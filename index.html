@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه مدیریت پروژه و جلسات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --bg:#F4F5F7;
+    --surface:#FFFFFF;
+    --ink:#1C1F26;
+    --muted:#6B7280;
+    --border:#E2E5EA;
+    --primary:#2B3A55;
+    --primary-light:#3C4E72;
+    --accent:#C97A2B;
+    --accent-soft:#FCEEDD;
+    --success:#2F7D5C;
+    --danger:#B3433D;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Vazirmatn',sans-serif; min-height:100vh;
+  }
+  .hidden{display:none !important;}
+  /* ---------- Login ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,var(--primary) 0%,#1A2438 100%); color:#fff; text-align:center; padding:24px;
+  }
+  #loginScreen .badge{
+    font-size:13px; letter-spacing:2px; color:var(--accent); font-weight:700; margin-bottom:10px;
+  }
+  #loginScreen h1{font-size:28px; font-weight:800; margin:0 0 8px;}
+  #loginScreen p{color:#C7CEDB; margin:0 0 28px; max-width:380px;}
+  #gsiBtnWrap{background:#fff; border-radius:8px; padding:4px;}
+  #loginError{color:#FFD2CE; margin-top:18px; font-size:14px; max-width:360px;}
+
+  /* ---------- App shell ---------- */
+  #app{display:flex; min-height:100vh;}
+  aside{
+    width:300px; background:var(--primary); color:#fff; flex-shrink:0;
+    display:flex; flex-direction:column; padding:22px 18px;
+  }
+  aside .brand{font-weight:800; font-size:18px; margin-bottom:2px;}
+  aside .brand small{display:block; font-weight:400; font-size:12px; color:#A8B2C8; margin-top:4px;}
+  aside .userline{
+    margin:18px 0 14px; padding:10px 12px; background:rgba(255,255,255,.08); border-radius:8px; font-size:13px;
+  }
+  aside .userline .name{font-weight:600;}
+  aside .userline .mail{color:#A8B2C8; font-size:12px;}
+  #newProjectBtn{
+    background:var(--accent); color:#fff; border:none; padding:11px 14px; border-radius:8px; font-family:inherit;
+    font-weight:700; cursor:pointer; font-size:14px; margin-bottom:16px;
+  }
+  #projectList{overflow-y:auto; flex:1;}
+  .proj-item{
+    display:flex; align-items:center; gap:10px; padding:10px 10px; border-radius:8px; cursor:pointer; margin-bottom:4px;
+  }
+  .proj-item:hover{background:rgba(255,255,255,.08);}
+  .proj-item.active{background:rgba(255,255,255,.16);}
+  .proj-num{
+    font-size:11px; font-weight:700; color:var(--accent); background:rgba(255,255,255,.1);
+    padding:2px 7px; border-radius:5px; flex-shrink:0;
+  }
+  .proj-name{font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #signOutBtn{
+    margin-top:14px; background:transparent; border:1px solid rgba(255,255,255,.25); color:#cbd2e0;
+    padding:9px; border-radius:8px; font-family:inherit; cursor:pointer; font-size:13px;
+  }
+  main{flex:1; padding:30px 36px; overflow-y:auto;}
+  #syncStatus{font-size:12px; color:var(--muted); margin-bottom:14px; display:flex; align-items:center; gap:6px;}
+  #syncStatus .dot{width:7px; height:7px; border-radius:50%; background:#bbb;}
+  #syncStatus.ok .dot{background:var(--success);}
+  #syncStatus.busy .dot{background:var(--accent);}
+
+  /* ---------- Empty / dashboard ---------- */
+  .empty-state{
+    text-align:center; color:var(--muted); margin-top:120px; font-size:15px;
+  }
+  .empty-state b{display:block; font-size:19px; color:var(--ink); margin-bottom:8px;}
+
+  /* ---------- Project header ---------- */
+  .project-header{
+    display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap:wrap; gap:14px;
+  }
+  .project-header .file-tag{
+    display:inline-block; font-size:12px; font-weight:700; color:var(--accent); background:var(--accent-soft);
+    padding:3px 10px; border-radius:6px; margin-bottom:8px;
+  }
+  .project-header h2{margin:0 0 4px; font-size:23px; font-weight:800;}
+  .project-header .desc{color:var(--muted); font-size:14px; max-width:560px;}
+  .btn{
+    background:var(--primary); color:#fff; border:none; padding:10px 16px; border-radius:8px; font-family:inherit;
+    font-weight:700; cursor:pointer; font-size:13px;
+  }
+  .btn.secondary{background:#fff; color:var(--primary); border:1px solid var(--border);}
+  .btn.small{padding:6px 11px; font-size:12px;}
+
+  /* ---------- Meeting timeline ---------- */
+  .timeline{position:relative; padding-right:18px;}
+  .timeline::before{
+    content:''; position:absolute; right:5px; top:6px; bottom:6px; width:2px; background:var(--border);
+  }
+  .meeting-card{
+    position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:16px;
+  }
+  .meeting-card::before{
+    content:''; position:absolute; right:-23px; top:24px; width:10px; height:10px; border-radius:50%;
+    background:var(--accent); border:2px solid var(--bg);
+  }
+  .meeting-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;}
+  .meeting-date{font-size:12px; color:var(--accent); font-weight:700;}
+  .meeting-title{font-size:16px; font-weight:700; margin:3px 0 8px;}
+  .meeting-summary{font-size:14px; line-height:1.9; color:#3A3F4B; white-space:pre-wrap;}
+  .meeting-section-label{font-size:12px; font-weight:700; color:var(--muted); margin:14px 0 6px;}
+  .followup-list{margin:0; padding-right:18px; font-size:13.5px; line-height:2;}
+  .attach-list{display:flex; flex-wrap:wrap; gap:8px;}
+  .attach-chip{
+    display:flex; align-items:center; gap:6px; background:#F0F2F5; border:1px solid var(--border);
+    padding:6px 10px; border-radius:7px; font-size:12.5px; text-decoration:none; color:var(--ink);
+  }
+  .attach-chip:hover{background:#E6E9EE;}
+  .comments{margin-top:14px; border-top:1px dashed var(--border); padding-top:12px;}
+  .comment{font-size:13px; margin-bottom:8px; background:#FAFBFC; border-radius:7px; padding:8px 10px;}
+  .comment .meta{color:var(--muted); font-size:11px; margin-bottom:2px;}
+  .comment-form{display:flex; gap:8px; margin-top:8px;}
+  .comment-form input{
+    flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:7px; font-family:inherit; font-size:13px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,24,34,.55); display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:50;
+  }
+  .modal{
+    background:#fff; border-radius:12px; padding:26px 26px 22px; width:100%; max-width:520px; max-height:88vh; overflow-y:auto;
+  }
+  .modal h3{margin:0 0 16px; font-size:18px; font-weight:800;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:#3A3F4B;}
+  .field input[type=text], .field input[type=date], .field textarea{
+    width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-family:inherit; font-size:14px;
+  }
+  .field textarea{resize:vertical; min-height:70px;}
+  .followup-row{display:flex; gap:6px; margin-bottom:6px;}
+  .followup-row input{flex:1;}
+  .removeRow{background:none; border:none; color:var(--danger); cursor:pointer; font-size:16px; padding:0 6px;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:18px;}
+  #uploadProgress{font-size:12px; color:var(--muted); margin-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="badge">پرونده‌های پروژه</div>
+  <h1>سامانه مدیریت پروژه و جلسات</h1>
+  <p>ورود با حساب گوگل سازمانی شما. داده‌ها و پیوست‌ها مستقیماً در گوگل‌درایو مشترک تیم ذخیره می‌شوند.</p>
+  <div id="gsiBtnWrap"></div>
+  <div id="loginError"></div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="hidden">
+  <aside>
+    <div class="brand">پرونده‌های پروژه<small>مدیریت پروژه و جلسات</small></div>
+    <div class="userline">
+      <div class="name" id="userName"></div>
+      <div class="mail" id="userMail"></div>
+    </div>
+    <button id="newProjectBtn">+ پروژه جدید</button>
+    <div id="projectList"></div>
+    <button id="signOutBtn">خروج از حساب</button>
+  </aside>
+  <main>
+    <div id="syncStatus"><span class="dot"></span><span id="syncText">آماده</span></div>
+    <div id="mainContent"></div>
+  </main>
+</div>
+
+<!-- ===================== MODALS ROOT ===================== -->
+<div id="modalRoot"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURATION — این بخش را قبل از انتشار با مقادیر خودتان جایگزین کنید
+   ===================================================================== */
+const CONFIG = {
+  CLIENT_ID: "https://1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
+  DRIVE_FOLDER_ID: "https://drive.google.com/drive/folders/1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto",
+  DB_FILENAME: "pms-database.json",
+  ALLOWED_EMAILS: [
+    // ایمیل گوگل دقیق هر کاربر مجاز را اینجا اضافه کنید (حداکثر حدود ۱۵ نفر)
+    "Applyforfund@gmail.com",
+    "Arsam.Smarttech@gmail.com"
+    "koroush.gheisari@gmail.com"
+  ],
+  SCOPES: "https://www.googleapis.com/auth/drive"
+};
+/* ===================================================================== */
+
+let accessToken = null;
+let currentUser = null;   // {name, email}
+let db = { nextProjectNumber: 1, projects: [], meetings: [] };
+let dbFileId = null;
+let activeProjectId = null;
+let tokenClient = null;
+
+const $ = sel => document.querySelector(sel);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML = html; return e; };
+
+/* ---------------- Google Identity / OAuth ---------------- */
+window.onload = () => {
+  google.accounts.id.initialize({
+    client_id: CONFIG.CLIENT_ID,
+    callback: handleIdToken
+  });
+  google.accounts.id.renderButton($('#gsiBtnWrap'), { theme: "outline", size: "large", text: "signin_with", shape: "pill" });
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.CLIENT_ID,
+    scope: CONFIG.SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showLoginError("دسترسی به گوگل‌درایو رد شد."); return; }
+      accessToken = resp.access_token;
+      bootApp();
+    }
+  });
+};
+
+function handleIdToken(response){
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const email = (payload.email || '').toLowerCase();
+  if (!CONFIG.ALLOWED_EMAILS.map(e=>e.toLowerCase()).includes(email)) {
+    showLoginError("این ایمیل در فهرست کاربران مجاز این سامانه نیست. با مدیر سامانه تماس بگیرید.");
+    return;
+  }
+  currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
+  tokenClient.requestAccessToken({ prompt: '' }); // get Drive access token
+}
+
+function showLoginError(msg){
+  $('#loginError').textContent = msg;
+}
+
+/* ---------------- Boot app after auth ---------------- */
+async function bootApp(){
+  $('#loginScreen').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  $('#userName').textContent = currentUser.name;
+  $('#userMail').textContent = currentUser.email;
+  $('#signOutBtn').onclick = () => location.reload();
+  $('#newProjectBtn').onclick = openNewProjectModal;
+  setSync('در حال بارگذاری اطلاعات...', 'busy');
+  await loadDatabase();
+  setSync('همگام با گوگل‌درایو', 'ok');
+  renderProjectList();
+  renderEmpty();
+}
+
+function setSync(text, state){
+  const s = $('#syncStatus');
+  s.className = state || '';
+  $('#syncText').textContent = text;
+}
+
+/* ---------------- Drive helpers ---------------- */
+async function driveFetch(url, options={}){
+  options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + accessToken });
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error('Drive API error: ' + res.status + ' ' + (await res.text()));
+  return res;
+}
+
+async function loadDatabase(){
+  // find existing db file inside the shared folder
+  const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
+  const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+  const listData = await listRes.json();
+  if (listData.files && listData.files.length > 0){
+    dbFileId = listData.files[0].id;
+    const fileRes = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
+    db = await fileRes.json();
+  } else {
+    // create new db file
+    dbFileId = await createDbFile();
+  }
+}
+
+async function createDbFile(){
+  const metadata = { name: CONFIG.DB_FILENAME, parents: [CONFIG.DRIVE_FOLDER_ID], mimeType: 'application/json' };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+  form.append('file', new Blob([JSON.stringify(db)], {type:'application/json'}));
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method:'POST', body: form });
+  const data = await res.json();
+  return data.id;
+}
+
+async function saveDatabase(){
+  setSync('در حال ذخیره...', 'busy');
+  await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`, {
+    method:'PATCH',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify(db)
+  });
+  setSync('همگام با گوگل‌درایو', 'ok');
+}
+
+async function uploadAttachment(file){
+  const metadata = { name: file.name, parents: [CONFIG.DRIVE_FOLDER_ID] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+  form.append('file', file);
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method:'POST', body: form });
+  return await res.json(); // {id, webViewLink}
+}
+
+/* ---------------- Rendering: project list ---------------- */
+function renderProjectList(){
+  const wrap = $('#projectList');
+  wrap.innerHTML = '';
+  db.projects.slice().sort((a,b)=>a.number-b.number).forEach(p=>{
+    const item = el('div', 'proj-item' + (p.id===activeProjectId ? ' active':''));
+    item.innerHTML = `<span class="proj-num">#${p.number}</span><span class="proj-name">${escapeHtml(p.name)}</span>`;
+    item.onclick = () => { activeProjectId = p.id; renderProjectList(); renderProject(p.id); };
+    wrap.appendChild(item);
+  });
+}
+
+function renderEmpty(){
+  $('#mainContent').innerHTML = `<div class="empty-state"><b>هنوز پروژه‌ای انتخاب نشده</b>از فهرست سمت راست یک پروژه را انتخاب کنید یا «پروژه جدید» بسازید.</div>`;
+}
+
+/* ---------------- New project ---------------- */
+function openNewProjectModal(){
+  const overlay = el('div','modal-overlay');
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>پروژه جدید — شماره پرونده #${db.nextProjectNumber}</h3>
+      <div class="field"><label>نام پروژه</label><input type="text" id="npName"></div>
+      <div class="field"><label>توضیح کوتاه (اختیاری)</label><textarea id="npDesc"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="npCancel">انصراف</button>
+        <button class="btn" id="npSave">ثبت پروژه</button>
+      </div>
+    </div>`;
+  $('#modalRoot').appendChild(overlay);
+  overlay.querySelector('#npCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#npSave').onclick = async () => {
+    const name = overlay.querySelector('#npName').value.trim();
+    if (!name) return;
+    const proj = {
+      id: 'p_' + Date.now(),
+      number: db.nextProjectNumber,
+      name,
+      description: overlay.querySelector('#npDesc').value.trim(),
+      createdBy: currentUser.email,
+      createdAt: new Date().toISOString()
+    };
+    db.projects.push(proj);
+    db.nextProjectNumber += 1;
+    overlay.remove();
+    await saveDatabase();
+    renderProjectList();
+    activeProjectId = proj.id;
+    renderProjectList();
+    renderProject(proj.id);
+  };
+}
+
+/* ---------------- Project detail ---------------- */
+function renderProject(projectId){
+  const p = db.projects.find(x=>x.id===projectId);
+  if (!p) return;
+  const meetings = db.meetings.filter(m=>m.projectId===projectId).sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const main = $('#mainContent');
+  main.innerHTML = `
+    <div class="project-header">
+      <div>
+        <div class="file-tag">پرونده شماره #${p.number}</div>
+        <h2>${escapeHtml(p.name)}</h2>
+        ${p.description ? `<div class="desc">${escapeHtml(p.description)}</div>` : ''}
+      </div>
+      <button class="btn" id="newMeetingBtn">+ ثبت جلسه جدید</button>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  `;
+  $('#newMeetingBtn').onclick = () => openNewMeetingModal(projectId);
+  const tl = $('#timeline');
+  if (meetings.length === 0){
+    tl.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>هنوز جلسه‌ای ثبت نشده</b>اولین جلسه این پروژه را ثبت کنید.</div>`;
+    return;
+  }
+  meetings.forEach(m => tl.appendChild(renderMeetingCard(m)));
+}
+
+function renderMeetingCard(m){
+  const card = el('div','meeting-card');
+  const followupsHtml = (m.followUps||[]).length
+    ? `<div class="meeting-section-label">پیگیری‌ها</div><ul class="followup-list">${m.followUps.map(f=>`<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '';
+  const attachHtml = (m.attachments||[]).length
+    ? `<div class="meeting-section-label">پیوست‌ها</div><div class="attach-list">${m.attachments.map(a=>`<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
+  const commentsHtml = (m.comments||[]).map(c=>`
+    <div class="comment"><div class="meta">${escapeHtml(c.user)} · ${new Date(c.date).toLocaleString('fa-IR')}</div>${escapeHtml(c.text)}</div>
+  `).join('');
+
+  card.innerHTML = `
+    <div class="meeting-top">
+      <div>
+        <div class="meeting-date">${formatDate(m.date)}</div>
+        <div class="meeting-title">${escapeHtml(m.title)}</div>
+      </div>
+    </div>
+    <div class="meeting-summary">${escapeHtml(m.summary)}</div>
+    ${followupsHtml}
+    ${attachHtml}
+    <div class="comments">
+      <div class="meeting-section-label">کامنت‌ها</div>
+      ${commentsHtml || '<div style="font-size:13px;color:var(--muted);">کامنتی ثبت نشده</div>'}
+      <div class="comment-form">
+        <input type="text" placeholder="نوشتن کامنت..." class="commentInput">
+        <button class="btn small commentSendBtn">ارسال</button>
+      </div>
+    </div>
+  `;
+  card.querySelector('.commentSendBtn').onclick = async () => {
+    const input = card.querySelector('.commentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    m.comments = m.comments || [];
+    m.comments.push({ user: currentUser.name, text, date: new Date().toISOString() });
+    await saveDatabase();
+    renderProject(m.projectId);
+  };
+  return card;
+}
+
+/* ---------------- New meeting modal ---------------- */
+function openNewMeetingModal(projectId){
+  const overlay = el('div','modal-overlay');
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>ثبت جلسه جدید</h3>
+      <div class="field"><label>عنوان جلسه</label><input type="text" id="mTitle"></div>
+      <div class="field"><label>تاریخ</label><input type="date" id="mDate" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>خلاصه جلسه</label><textarea id="mSummary"></textarea></div>
+      <div class="field">
+        <label>پیگیری‌ها</label>
+        <div id="followupRows"></div>
+        <button type="button" class="btn secondary small" id="addFollowupBtn">+ افزودن مورد پیگیری</button>
+      </div>
+      <div class="field">
+        <label>پیوست (نامه‌های ارسالی و...)</label>
+        <input type="file" id="mFiles" multiple>
+        <div id="uploadProgress"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="mCancel">انصراف</button>
+        <button class="btn" id="mSave">ثبت جلسه</button>
+      </div>
+    </div>`;
+  $('#modalRoot').appendChild(overlay);
+
+  function addFollowupRow(){
+    const row = el('div','followup-row');
+    row.innerHTML = `<input type="text" placeholder="مورد پیگیری..."><button type="button" class="removeRow">✕</button>`;
+    row.querySelector('.removeRow').onclick = () => row.remove();
+    overlay.querySelector('#followupRows').appendChild(row);
+  }
+  overlay.querySelector('#addFollowupBtn').onclick = addFollowupRow;
+  addFollowupRow();
+
+  overlay.querySelector('#mCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#mSave').onclick = async () => {
+    const title = overlay.querySelector('#mTitle').value.trim();
+    const date = overlay.querySelector('#mDate').value;
+    const summary = overlay.querySelector('#mSummary').value.trim();
+    if (!title || !date) return;
+    const followUps = Array.from(overlay.querySelectorAll('#followupRows input')).map(i=>i.value.trim()).filter(Boolean);
+    const files = Array.from(overlay.querySelector('#mFiles').files);
+
+    const saveBtn = overlay.querySelector('#mSave');
+    saveBtn.disabled = true; saveBtn.textContent = 'در حال ثبت...';
+
+    const attachments = [];
+    for (let i=0;i<files.length;i++){
+      overlay.querySelector('#uploadProgress').textContent = `در حال بارگذاری پیوست ${i+1} از ${files.length}...`;
+      const up = await uploadAttachment(files[i]);
+      attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink });
+    }
+
+    const meeting = {
+      id: 'm_' + Date.now(),
+      projectId, title, date, summary, followUps, attachments,
+      comments: [],
+      createdBy: currentUser.email,
+      createdAt: new Date().toISOString()
+    };
+    db.meetings.push(meeting);
+    overlay.remove();
+    await saveDatabase();
+    renderProject(projectId);
+  };
+}
+
+/* ---------------- utils ---------------- */
+function escapeHtml(str){
+  return String(str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatDate(d){
+  try{ return new Date(d).toLocaleDateString('fa-IR', {year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d; }
+}
+</script>
+</body>
+</html>
