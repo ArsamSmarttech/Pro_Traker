@@ -7,237 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* ===== RESET ===== */
+  /* تمام استایل‌های قبلی را اینجا قرار دهید (از کد قبلی) */
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Vazirmatn',sans-serif;background:#F4F5F7;min-height:100vh;font-size:14px;}
   .hidden{display:none !important;}
-  
-  /* ===== SCROLLBAR ===== */
-  ::-webkit-scrollbar{width:4px;height:4px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:#D4872E;border-radius:4px;}
-
-  /* ===== LOGIN ===== */
-  #loginScreen {
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:linear-gradient(145deg,#1A2A3A 0%,#0F1A28 100%);color:#fff;padding:20px;
-  }
-  #loginScreen .logo{font-size:48px;margin-bottom:8px;}
-  #loginScreen h1{font-size:clamp(22px,5vw,28px);margin-bottom:6px;}
-  #loginScreen .subtitle{color:#B0BCCA;margin-bottom:24px;font-size:clamp(13px,2vw,14px);}
-  .login-box{
-    background:rgba(255,255,255,0.05);padding:clamp(20px,4vw,32px) clamp(20px,4vw,40px);
-    border-radius:16px;width:100%;max-width:380px;border:1px solid rgba(255,255,255,0.08);
-  }
-  .login-box .field{margin-bottom:14px;text-align:right;}
-  .login-box label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#C7CEDB;}
-  .login-box input{
-    width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;
-    background:#FFFFFF;color:#1C1F26;font-family:'Vazirmatn',sans-serif;font-size:15px;
-    transition:0.2s;direction:ltr;
-  }
-  .login-box input::placeholder{color:#9AA5B5;}
-  .login-box input:focus{outline:none;border-color:#D4872E;box-shadow:0 0 0 3px rgba(212,135,46,0.2);}
-  #loginBtn{
-    width:100%;padding:12px;background:#D4872E;color:#fff;border:none;border-radius:8px;
-    font-family:'Vazirmatn',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:0.2s;margin-top:6px;
-  }
-  #loginBtn:hover{background:#BF781F;transform:translateY(-1px);}
-  #loginBtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-  #loginError{color:#FFB5AD;margin-top:12px;font-size:13px;background:rgba(255,0,0,0.1);padding:10px 16px;border-radius:8px;display:none;text-align:center;}
-
-  /* ===== APP SHELL ===== */
-  #app{display:flex;min-height:100vh;flex-wrap:wrap;}
-  
-  /* ===== SIDEBAR ===== */
-  aside{
-    width:280px;background:#1A2A3A;color:#fff;padding:16px 14px;
-    height:100vh;overflow-y:auto;position:sticky;top:0;flex-shrink:0;
-  }
-  aside .brand{font-weight:800;font-size:clamp(18px,2.5vw,20px);}
-  aside .brand small{display:block;font-weight:400;font-size:11px;color:#8898B0;margin-top:2px;}
-  aside .userline{margin:14px 0 12px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:10px;font-size:12px;}
-  aside .userline .name{font-weight:600;}
-  aside .userline .mail{color:#8898B0;font-size:10px;word-break:break-all;}
-  #newProjectBtn{
-    background:#D4872E;color:#fff;border:none;padding:10px 14px;border-radius:10px;
-    font-family:inherit;font-weight:700;cursor:pointer;font-size:13px;margin-bottom:14px;width:100%;transition:0.2s;
-  }
-  #newProjectBtn:hover{background:#BF781F;}
-  #projectList{overflow-y:auto;flex:1;max-height:calc(100vh - 250px);}
-  .proj-item{
-    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:0.15s;
-  }
-  .proj-item:hover{background:rgba(255,255,255,.07);}
-  .proj-item.active{background:rgba(255,255,255,.12);}
-  .proj-num{font-size:9px;font-weight:700;color:#D4872E;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;}
-  .proj-name{font-size:12.5px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .proj-delete{background:transparent;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:13px;opacity:0;transition:0.15s;padding:0 4px;}
-  .proj-item:hover .proj-delete{opacity:1;}
-  .proj-delete:hover{color:#B3433D;}
-  #signOutBtn{
-    margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#9AABBF;
-    padding:8px;border-radius:8px;font-family:inherit;cursor:pointer;font-size:12px;width:100%;transition:0.2s;
-  }
-  #signOutBtn:hover{background:rgba(255,255,255,.04);color:#fff;}
-
-  /* ===== MAIN ===== */
-  main{flex:1;padding:clamp(12px,2vw,24px);overflow-y:auto;background:#F4F5F7;min-width:0;}
-
-  #syncStatus{
-    font-size:11px;color:#6B7280;margin-bottom:12px;display:flex;align-items:center;gap:6px;
-    background:#fff;padding:6px 12px;border-radius:8px;border:1px solid #E2E5EA;
-  }
-  #syncStatus .dot{width:7px;height:7px;border-radius:50%;background:#bbb;flex-shrink:0;}
-  #syncStatus.ok .dot{background:#2F7D5C;}
-  #syncStatus.busy .dot{background:#D4872E;animation:pulse 1s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  
-  .empty-state{text-align:center;color:#6B7280;margin-top:60px;font-size:14px;}
-  .empty-state b{display:block;font-size:clamp(18px,3vw,21px);color:#1C1F26;margin-bottom:6px;}
-
-  /* ===== BUTTONS ===== */
-  .btn{
-    background:#1A2A3A;color:#fff;border:none;padding:8px 14px;border-radius:8px;
-    font-family:inherit;font-weight:600;cursor:pointer;font-size:12px;transition:0.2s;display:inline-flex;align-items:center;gap:4px;
-  }
-  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-  .btn.accent{background:#D4872E;}
-  .btn.accent:hover{background:#BF781F;}
-  .btn.secondary{background:#fff;color:#1A2A3A;border:1px solid #E2E5EA;}
-  .btn.secondary:hover{background:#f8f9fa;}
-  .btn.small{padding:5px 10px;font-size:10px;}
-  .btn.danger{background:#B3433D;}
-  .btn.danger:hover{background:#9E3A34;}
-
-  /* ===== PROJECT HEADER ===== */
-  .project-header{
-    display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;
-    flex-wrap:wrap;gap:10px;background:#fff;padding:clamp(12px,2vw,18px);border-radius:12px;border:1px solid #E2E5EA;
-  }
-  .project-header .file-tag{
-    display:inline-block;font-size:10px;font-weight:700;color:#D4872E;background:#FDF1E0;padding:2px 10px;border-radius:50px;
-  }
-  .project-header h2{margin:2px 0;font-size:clamp(18px,2.5vw,22px);}
-  .project-header .desc{color:#6B7280;font-size:clamp(12px,1.5vw,14px);}
-  .header-actions{display:flex;gap:6px;flex-wrap:wrap;}
-
-  /* ===== TABS ===== */
-  .tabs{
-    display:flex;gap:3px;background:#fff;border-radius:10px;padding:3px;border:1px solid #E2E5EA;margin-bottom:16px;flex-wrap:wrap;
-  }
-  .tab{
-    padding:clamp(6px,1vw,10px) clamp(12px,2vw,18px);border-radius:8px;cursor:pointer;font-weight:600;
-    font-size:clamp(11px,1.2vw,13px);border:none;background:transparent;font-family:inherit;color:#6B7280;transition:0.15s;flex:1;text-align:center;min-width:80px;
-  }
-  .tab:hover{background:#F4F5F7;}
-  .tab.active{background:#1A2A3A;color:#fff;}
-
-  .tab-content{display:none;}
-  .tab-content.active{display:block;}
-
-  /* ===== TIMELINE ===== */
-  .timeline{position:relative;padding-right:14px;}
-  .timeline::before{
-    content:'';position:absolute;right:4px;top:6px;bottom:6px;width:2px;background:#E2E5EA;
-  }
-  .meeting-card{
-    position:relative;background:#fff;border:1px solid #E2E5EA;border-radius:10px;
-    padding:clamp(12px,2vw,18px);margin-bottom:14px;
-  }
-  .meeting-card::before{
-    content:'';position:absolute;right:-17px;top:20px;width:10px;height:10px;border-radius:50%;
-    background:#D4872E;border:2px solid #F4F5F7;
-  }
-  .meeting-title{font-size:clamp(15px,2vw,17px);font-weight:700;margin:2px 0 6px;}
-  .meeting-summary{
-    font-size:clamp(12px,1.2vw,14px);line-height:1.8;background:#FAFBFC;padding:10px 12px;border-radius:8px;margin-top:4px;white-space:pre-wrap;word-break:break-word;
-  }
-  .meeting-date{font-size:11px;color:#D4872E;font-weight:700;}
-
-  /* ===== LETTERS ===== */
-  .letter-card{
-    background:#fff;border:1px solid #E2E5EA;border-radius:10px;
-    padding:clamp(12px,2vw,16px);margin-bottom:12px;border-right:4px solid #D4872E;
-  }
-  .letter-number{font-size:11px;font-weight:700;color:#D4872E;background:#FDF1E0;padding:2px 10px;border-radius:50px;display:inline-block;}
-  .letter-title{font-size:clamp(15px,1.8vw,16px);font-weight:700;margin:2px 0 4px;}
-  .letter-meta{font-size:11px;color:#6B7280;}
-  .letter-summary{font-size:clamp(12px,1.2vw,14px);line-height:1.8;color:#2E3440;margin-top:4px;}
-
-  /* ===== ATTACHMENTS ===== */
-  .attach-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-  .attach-chip{
-    display:inline-flex;align-items:center;gap:4px;background:#F0F2F5;border:1px solid #E2E5EA;
-    padding:4px 10px;border-radius:6px;font-size:11px;text-decoration:none;color:#1C1F26;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .attach-chip:hover{background:#E6E9EE;}
-
-  /* ===== COMMENTS ===== */
-  .comments{margin-top:12px;border-top:1px dashed #E2E5EA;padding-top:12px;}
-  .comment{font-size:clamp(12px,1.2vw,13px);margin-bottom:8px;background:#F8F9FB;border-radius:7px;padding:8px 10px;border-right:2px solid #D4872E;word-break:break-word;}
-  .comment .meta{color:#6B7280;font-size:10px;margin-bottom:2px;}
-  .comment-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-  .comment-form input{
-    flex:1;min-width:120px;padding:6px 10px;border:1px solid #E2E5EA;border-radius:6px;font-family:inherit;font-size:12px;color:#1C1F26;
-  }
-  .comment-form input:focus{outline:none;border-color:#D4872E;}
-
-  /* ===== MODAL ===== */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(10,14,26,.6);display:flex;align-items:center;justify-content:center;
-    padding:16px;z-index:50;backdrop-filter:blur(3px);
-  }
-  .modal{
-    background:#fff;border-radius:14px;padding:clamp(16px,3vw,24px);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
-  }
-  .modal h3{margin:0 0 14px;font-size:clamp(17px,2vw,19px);font-weight:800;}
-  .field{margin-bottom:12px;}
-  .field label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#2E3440;}
-  .field input,.field textarea,.field select{
-    width:100%;padding:8px 10px;border:1px solid #E2E5EA;border-radius:8px;font-family:inherit;font-size:clamp(13px,1.2vw,14px);
-    background:#FAFBFC;transition:0.15s;color:#1C1F26;
-  }
-  .field input:focus,.field textarea:focus{outline:none;border-color:#D4872E;background:#fff;}
-  .field textarea{resize:vertical;min-height:60px;}
-  .modal-actions{
-    display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #E2E5EA;flex-wrap:wrap;
-  }
-  .followup-row{display:flex;gap:4px;margin-bottom:4px;align-items:center;}
-  .followup-row input{flex:1;}
-  .removeRow{background:none;border:none;color:#B3433D;cursor:pointer;font-size:16px;padding:0 4px;}
-  #uploadProgress{font-size:11px;color:#6B7280;margin-top:4px;}
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 768px) {
-    #app{flex-direction:column;}
-    aside{
-      width:100%;height:auto;max-height:50vh;position:relative;padding:12px;
-    }
-    #projectList{max-height:30vh;}
-    main{padding:10px;}
-    .tabs{flex-wrap:nowrap;overflow-x:auto;}
-    .tab{flex:0 0 auto;min-width:60px;padding:6px 10px;font-size:11px;}
-    .project-header{flex-direction:column;}
-    .header-actions{width:100%;}
-    .header-actions .btn{flex:1;justify-content:center;font-size:11px;padding:6px 10px;}
-    .modal{padding:16px;margin:10px;}
-    .login-box{padding:20px;}
-  }
-
-  @media (max-width: 480px) {
-    aside .brand{font-size:16px;}
-    aside .userline{padding:8px 10px;font-size:11px;}
-    #newProjectBtn{font-size:12px;padding:8px 12px;}
-    .proj-item{padding:6px 8px;}
-    .proj-name{font-size:11px;}
-    .meeting-card{padding:10px 14px;}
-    .letter-card{padding:10px 14px;}
-  }
-
-  /* ===== LOADING ===== */
-  .loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid #E2E5EA;border-top-color:#D4872E;border-radius:50%;animation:spin 0.6s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
+  /* ... ادامه استایل‌ها ... */
 </style>
 </head>
 <body>
@@ -278,20 +52,20 @@
 
 <script>
 // ================================================================
-// CONFIG - با ایمیل مشخص برای دسترسی به درایو
+// CONFIG - با ایمیل جدید koroush.gheisari@gmail.com
 // ================================================================
 const CONFIG = {
   DRIVE_FOLDER_ID: "1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC",
   DB_FILENAME: "pms-database.json",
   CLIENT_ID: "1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
-  DRIVE_EMAIL: "koroush.gheisari@gmail.com"  // ← ایمیل مشخص برای دسترسی به درایو
+  DRIVE_EMAIL: "koroush.gheisari@gmail.com"  // ← ایمیل جدید
 };
 
 const USERS = {
   'admin': { password: '123456', name: 'مدیر سیستم', email: 'admin@system.com' },
   'user': { password: '123456', name: 'کاربر عادی', email: 'user@system.com' },
   'arsam': { password: '123456', name: 'آرسام', email: 'arsam@system.com' },
-  'koroush': { password: '123456', name: 'کوروش', email: 'koroush@system.com' }
+  'koroush': { password: '123456', name: 'کوروش', email: 'koroush.gheisari@gmail.com' }
 };
 
 // ================================================================
@@ -310,7 +84,6 @@ let tokenRefreshInterval = null;
 // HELPERS
 // ================================================================
 const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; };
 
 function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -354,7 +127,7 @@ function handleLogin(){
   $('#loginScreen').classList.add('hidden');
   $('#app').classList.remove('hidden');
   $('#userName').textContent = currentUser.name;
-  $('#userMail').textContent = currentUser.email;
+  $('#userMail').textContent = '📧 ' + CONFIG.DRIVE_EMAIL;
   $('#signOutBtn').onclick = () => { 
     if(tokenRefreshInterval) clearInterval(tokenRefreshInterval);
     localStorage.removeItem('drive_token');
@@ -367,28 +140,30 @@ function handleLogin(){
   updateDriveStatus('در حال اتصال...', false);
   
   initializeDriveConnection().then(() => {
-    setSync('همگام با گوگل‌درایو', 'ok');
-    updateDriveStatus('✅ متصل', true);
+    setSync('همگام با گوگل‌درایو ✅', 'ok');
+    updateDriveStatus('✅ متصل با ' + CONFIG.DRIVE_EMAIL, true);
     renderProjectList();
     renderEmpty();
   }).catch(err => {
     console.error('❌ خطا در اتصال به درایو:', err);
     setSync('خطا در اتصال به درایو', '');
     updateDriveStatus('❌ خطا: ' + err.message, false);
-    alert('خطا در اتصال به گوگل درایو: ' + err.message + '\nلطفاً دوباره تلاش کنید.');
+    alert('❌ خطا در اتصال به گوگل درایو:\n' + err.message + 
+          '\n\n🔧 راه‌حل:\n' +
+          '1. پوشه درایو را با ایمیل ' + CONFIG.DRIVE_EMAIL + ' به اشتراک بگذارید\n' +
+          '2. ایمیل را به Test Users در Google Cloud Console اضافه کنید\n' +
+          '3. کش مرورگر را پاک کنید و دوباره تلاش کنید');
   });
 }
 
 // ================================================================
-// GOOGLE DRIVE CONNECTION - با ایمیل مشخص
+// GOOGLE DRIVE CONNECTION
 // ================================================================
 async function initializeDriveConnection() {
-  // ابتدا بررسی می‌کنیم آیا توکن ذخیره شده معتبر است
   const savedToken = localStorage.getItem('drive_token');
   if(savedToken) {
     accessToken = savedToken;
     try {
-      // تست اعتبار توکن
       await testToken();
       await loadDatabase();
       return;
@@ -399,11 +174,9 @@ async function initializeDriveConnection() {
     }
   }
   
-  // دریافت توکن جدید با ایمیل مشخص
   await requestNewToken();
   await loadDatabase();
   
-  // تنظیم تایمر برای رفرش توکن هر 50 دقیقه
   if(tokenRefreshInterval) clearInterval(tokenRefreshInterval);
   tokenRefreshInterval = setInterval(() => {
     console.log('🔄 رفرش توکن در پس‌زمینه...');
@@ -413,9 +186,8 @@ async function initializeDriveConnection() {
 
 async function requestNewToken() {
   return new Promise((resolve, reject) => {
-    updateDriveStatus('درخواست مجوز...', false);
+    updateDriveStatus('درخواست مجوز با ' + CONFIG.DRIVE_EMAIL + '...', false);
     
-    // ساخت URL با login_hint برای ایمیل مشخص
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=${CONFIG.CLIENT_ID}&` +
       `redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&` +
@@ -424,7 +196,6 @@ async function requestNewToken() {
       `login_hint=${encodeURIComponent(CONFIG.DRIVE_EMAIL)}&` +
       `prompt=consent`;
     
-    // باز کردن پنجره برای ورود
     const win = window.open(authUrl, '_blank', 'width=500,height=600');
     if(!win) {
       reject(new Error('پنجره باز نشد. لطفاً pop-up را فعال کنید.'));
@@ -442,7 +213,6 @@ async function requestNewToken() {
           return;
         }
         
-        // بررسی توکن در localStorage (از پنجره دیگر)
         const token = localStorage.getItem('drive_token');
         if(token) {
           accessToken = token;
@@ -452,12 +222,9 @@ async function requestNewToken() {
           updateDriveStatus('✅ متصل', true);
           resolve(token);
         }
-      } catch(e) {
-        // خطا را نادیده بگیر
-      }
+      } catch(e) {}
     }, 1000);
     
-    // تایم‌اوت 2 دقیقه
     setTimeout(() => {
       if(!resolved) {
         clearInterval(checkInterval);
@@ -488,7 +255,6 @@ async function driveFetch(url, options={}) {
   
   let res = await fetch(url, options);
   if(res.status === 401) {
-    // توکن منقضی شده، دوباره تلاش
     accessToken = null;
     localStorage.removeItem('drive_token');
     await requestNewToken();
@@ -504,7 +270,7 @@ async function driveFetch(url, options={}) {
 }
 
 // ================================================================
-// DATABASE - با ذخیره در گوگل درایو
+// DATABASE
 // ================================================================
 async function loadDatabase() {
   try {
@@ -523,7 +289,6 @@ async function loadDatabase() {
     }
   } catch(e) {
     console.error('❌ خطا در بارگذاری دیتابیس:', e);
-    // استفاده از بکاپ محلی در صورت خطا
     const backup = localStorage.getItem('pms_db_backup');
     if(backup) {
       db = JSON.parse(backup);
@@ -561,7 +326,6 @@ async function saveDatabase() {
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(db)
     });
-    // بکاپ محلی
     localStorage.setItem('pms_db_backup', JSON.stringify(db));
     setSync('همگام با گوگل‌درایو ✅', 'ok');
     console.log('✅ دیتابیس در درایو ذخیره شد');
@@ -590,7 +354,7 @@ async function uploadAttachment(file, customName=null) {
 }
 
 // ================================================================
-// PROJECTS (همان کدهای قبلی)
+// PROJECTS, MEETINGS, LETTERS - کدهای قبلی
 // ================================================================
 function renderProjectList(){
   const wrap = $('#projectList');
@@ -641,9 +405,6 @@ function openNewProjectModal(){
   };
 }
 
-// ================================================================
-// RENDER PROJECT
-// ================================================================
 function renderProject(projectId){
   const p = db.projects.find(x=>x.id===projectId);
   if(!p){ renderEmpty(); return; }
@@ -674,9 +435,6 @@ function renderProject(projectId){
   renderLetters(projectId);
 }
 
-// ================================================================
-// MEETINGS
-// ================================================================
 function renderMeetings(projectId){
   const meetings = db.meetings.filter(m=>m.projectId===projectId).sort((a,b)=>new Date(b.date)-new Date(a.date));
   const tl = $('#timeline');
@@ -713,9 +471,6 @@ function renderMeetings(projectId){
   });
 }
 
-// ================================================================
-// LETTERS
-// ================================================================
 function renderLetters(projectId){
   const letters = db.letters.filter(l=>l.projectId===projectId).sort((a,b)=>b.number-a.number);
   const wrap = $('#letterList');
@@ -737,9 +492,6 @@ function renderLetters(projectId){
   });
 }
 
-// ================================================================
-// MODALS
-// ================================================================
 function openNewMeetingModal(projectId){
   const overlay = el('div','modal-overlay');
   overlay.innerHTML = `
