@@ -2,483 +2,264 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <title>سامانه مدیریت پروژه</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ===== RESET ===== */
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Vazirmatn',sans-serif;background:#F4F5F7;min-height:100vh;}
+  body{font-family:'Vazirmatn',sans-serif;background:#F4F5F7;min-height:100vh;font-size:14px;}
   .hidden{display:none !important;}
   
-  /* ---------- صفحه ورود ---------- */
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar{width:4px;height:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#D4872E;border-radius:4px;}
+
+  /* ===== LOGIN ===== */
   #loginScreen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(145deg, #1A2A3A 0%, #0F1A28 100%);
-    color: #fff;
-    text-align: center;
-    padding: 24px;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,#1A2A3A 0%,#0F1A28 100%);color:#fff;padding:20px;
   }
-  
-  #loginScreen .logo { font-size: 48px; margin-bottom: 8px; }
-  #loginScreen h1 { font-size: 28px; margin-bottom: 6px; }
-  #loginScreen .subtitle { color: #B0BCCA; margin-bottom: 30px; font-size: 14px; }
-  
-  .login-box {
-    background: rgba(255,255,255,0.05);
-    padding: 32px 40px;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 380px;
-    border: 1px solid rgba(255,255,255,0.08);
+  #loginScreen .logo{font-size:48px;margin-bottom:8px;}
+  #loginScreen h1{font-size:clamp(22px,5vw,28px);margin-bottom:6px;}
+  #loginScreen .subtitle{color:#B0BCCA;margin-bottom:24px;font-size:clamp(13px,2vw,14px);}
+  .login-box{
+    background:rgba(255,255,255,0.05);padding:clamp(20px,4vw,32px) clamp(20px,4vw,40px);
+    border-radius:16px;width:100%;max-width:380px;border:1px solid rgba(255,255,255,0.08);
   }
-  
-  .login-box .field {
-    margin-bottom: 16px;
-    text-align: right;
+  .login-box .field{margin-bottom:14px;text-align:right;}
+  .login-box label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#C7CEDB;}
+  .login-box input{
+    width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;
+    background:#FFFFFF;color:#1C1F26;font-family:'Vazirmatn',sans-serif;font-size:15px;
+    transition:0.2s;direction:ltr;
   }
-  
-  .login-box label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #C7CEDB;
+  .login-box input::placeholder{color:#9AA5B5;}
+  .login-box input:focus{outline:none;border-color:#D4872E;box-shadow:0 0 0 3px rgba(212,135,46,0.2);}
+  #loginBtn{
+    width:100%;padding:12px;background:#D4872E;color:#fff;border:none;border-radius:8px;
+    font-family:'Vazirmatn',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:0.2s;margin-top:6px;
   }
+  #loginBtn:hover{background:#BF781F;transform:translateY(-1px);}
+  #loginBtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+  #loginError{color:#FFB5AD;margin-top:12px;font-size:13px;background:rgba(255,0,0,0.1);padding:10px 16px;border-radius:8px;display:none;text-align:center;}
+
+  /* ===== APP SHELL ===== */
+  #app{display:flex;min-height:100vh;flex-wrap:wrap;}
   
-  .login-box input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
-    background: #FFFFFF;
-    color: #1C1F26;
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 15px;
-    transition: 0.2s;
-    direction: ltr;
+  /* ===== SIDEBAR ===== */
+  aside{
+    width:280px;background:#1A2A3A;color:#fff;padding:16px 14px;
+    height:100vh;overflow-y:auto;position:sticky;top:0;flex-shrink:0;
   }
-  
-  .login-box input::placeholder {
-    color: #9AA5B5;
+  aside .brand{font-weight:800;font-size:clamp(18px,2.5vw,20px);}
+  aside .brand small{display:block;font-weight:400;font-size:11px;color:#8898B0;margin-top:2px;}
+  aside .userline{margin:14px 0 12px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:10px;font-size:12px;}
+  aside .userline .name{font-weight:600;}
+  aside .userline .mail{color:#8898B0;font-size:10px;word-break:break-all;}
+  #newProjectBtn{
+    background:#D4872E;color:#fff;border:none;padding:10px 14px;border-radius:10px;
+    font-family:inherit;font-weight:700;cursor:pointer;font-size:13px;margin-bottom:14px;width:100%;transition:0.2s;
   }
-  
-  .login-box input:focus {
-    outline: none;
-    border-color: #D4872E;
-    box-shadow: 0 0 0 3px rgba(212, 135, 46, 0.2);
+  #newProjectBtn:hover{background:#BF781F;}
+  #projectList{overflow-y:auto;flex:1;max-height:calc(100vh - 250px);}
+  .proj-item{
+    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:0.15s;
   }
-  
-  #loginBtn {
-    width: 100%;
-    padding: 12px;
-    background: #D4872E;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
-    margin-top: 8px;
+  .proj-item:hover{background:rgba(255,255,255,.07);}
+  .proj-item.active{background:rgba(255,255,255,.12);}
+  .proj-num{font-size:9px;font-weight:700;color:#D4872E;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;}
+  .proj-name{font-size:12.5px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .proj-delete{background:transparent;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:13px;opacity:0;transition:0.15s;padding:0 4px;}
+  .proj-item:hover .proj-delete{opacity:1;}
+  .proj-delete:hover{color:#B3433D;}
+  #signOutBtn{
+    margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#9AABBF;
+    padding:8px;border-radius:8px;font-family:inherit;cursor:pointer;font-size:12px;width:100%;transition:0.2s;
   }
-  
-  #loginBtn:hover {
-    background: #BF781F;
-    transform: translateY(-1px);
+  #signOutBtn:hover{background:rgba(255,255,255,.04);color:#fff;}
+
+  /* ===== MAIN ===== */
+  main{flex:1;padding:clamp(12px,2vw,24px);overflow-y:auto;background:#F4F5F7;min-width:0;}
+
+  #syncStatus{
+    font-size:11px;color:#6B7280;margin-bottom:12px;display:flex;align-items:center;gap:6px;
+    background:#fff;padding:6px 12px;border-radius:8px;border:1px solid #E2E5EA;
   }
+  #syncStatus .dot{width:7px;height:7px;border-radius:50%;background:#bbb;flex-shrink:0;}
+  #syncStatus.ok .dot{background:#2F7D5C;}
+  #syncStatus.busy .dot{background:#D4872E;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
   
-  #loginBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+  .empty-state{text-align:center;color:#6B7280;margin-top:60px;font-size:14px;}
+  .empty-state b{display:block;font-size:clamp(18px,3vw,21px);color:#1C1F26;margin-bottom:6px;}
+
+  /* ===== BUTTONS ===== */
+  .btn{
+    background:#1A2A3A;color:#fff;border:none;padding:8px 14px;border-radius:8px;
+    font-family:inherit;font-weight:600;cursor:pointer;font-size:12px;transition:0.2s;display:inline-flex;align-items:center;gap:4px;
   }
-  
-  #loginError {
-    color: #FFB5AD;
-    margin-top: 14px;
-    font-size: 13px;
-    background: rgba(255,0,0,0.1);
-    padding: 10px 16px;
-    border-radius: 8px;
-    display: none;
-    width: 100%;
-    text-align: center;
+  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+  .btn.accent{background:#D4872E;}
+  .btn.accent:hover{background:#BF781F;}
+  .btn.secondary{background:#fff;color:#1A2A3A;border:1px solid #E2E5EA;}
+  .btn.secondary:hover{background:#f8f9fa;}
+  .btn.small{padding:5px 10px;font-size:10px;}
+  .btn.danger{background:#B3433D;}
+  .btn.danger:hover{background:#9E3A34;}
+
+  /* ===== PROJECT HEADER ===== */
+  .project-header{
+    display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;
+    flex-wrap:wrap;gap:10px;background:#fff;padding:clamp(12px,2vw,18px);border-radius:12px;border:1px solid #E2E5EA;
+  }
+  .project-header .file-tag{
+    display:inline-block;font-size:10px;font-weight:700;color:#D4872E;background:#FDF1E0;padding:2px 10px;border-radius:50px;
+  }
+  .project-header h2{margin:2px 0;font-size:clamp(18px,2.5vw,22px);}
+  .project-header .desc{color:#6B7280;font-size:clamp(12px,1.5vw,14px);}
+  .header-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+  /* ===== TABS ===== */
+  .tabs{
+    display:flex;gap:3px;background:#fff;border-radius:10px;padding:3px;border:1px solid #E2E5EA;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .tab{
+    padding:clamp(6px,1vw,10px) clamp(12px,2vw,18px);border-radius:8px;cursor:pointer;font-weight:600;
+    font-size:clamp(11px,1.2vw,13px);border:none;background:transparent;font-family:inherit;color:#6B7280;transition:0.15s;flex:1;text-align:center;min-width:80px;
+  }
+  .tab:hover{background:#F4F5F7;}
+  .tab.active{background:#1A2A3A;color:#fff;}
+
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* ===== TIMELINE ===== */
+  .timeline{position:relative;padding-right:14px;}
+  .timeline::before{
+    content:'';position:absolute;right:4px;top:6px;bottom:6px;width:2px;background:#E2E5EA;
+  }
+  .meeting-card{
+    position:relative;background:#fff;border:1px solid #E2E5EA;border-radius:10px;
+    padding:clamp(12px,2vw,18px);margin-bottom:14px;
+  }
+  .meeting-card::before{
+    content:'';position:absolute;right:-17px;top:20px;width:10px;height:10px;border-radius:50%;
+    background:#D4872E;border:2px solid #F4F5F7;
+  }
+  .meeting-title{font-size:clamp(15px,2vw,17px);font-weight:700;margin:2px 0 6px;}
+  .meeting-summary{
+    font-size:clamp(12px,1.2vw,14px);line-height:1.8;background:#FAFBFC;padding:10px 12px;border-radius:8px;margin-top:4px;white-space:pre-wrap;word-break:break-word;
+  }
+  .meeting-date{font-size:11px;color:#D4872E;font-weight:700;}
+
+  /* ===== LETTERS ===== */
+  .letter-card{
+    background:#fff;border:1px solid #E2E5EA;border-radius:10px;
+    padding:clamp(12px,2vw,16px);margin-bottom:12px;border-right:4px solid #D4872E;
+  }
+  .letter-number{font-size:11px;font-weight:700;color:#D4872E;background:#FDF1E0;padding:2px 10px;border-radius:50px;display:inline-block;}
+  .letter-title{font-size:clamp(15px,1.8vw,16px);font-weight:700;margin:2px 0 4px;}
+  .letter-meta{font-size:11px;color:#6B7280;}
+  .letter-summary{font-size:clamp(12px,1.2vw,14px);line-height:1.8;color:#2E3440;margin-top:4px;}
+
+  /* ===== ATTACHMENTS ===== */
+  .attach-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .attach-chip{
+    display:inline-flex;align-items:center;gap:4px;background:#F0F2F5;border:1px solid #E2E5EA;
+    padding:4px 10px;border-radius:6px;font-size:11px;text-decoration:none;color:#1C1F26;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .attach-chip:hover{background:#E6E9EE;}
+
+  /* ===== COMMENTS ===== */
+  .comments{margin-top:12px;border-top:1px dashed #E2E5EA;padding-top:12px;}
+  .comment{font-size:clamp(12px,1.2vw,13px);margin-bottom:8px;background:#F8F9FB;border-radius:7px;padding:8px 10px;border-right:2px solid #D4872E;word-break:break-word;}
+  .comment .meta{color:#6B7280;font-size:10px;margin-bottom:2px;}
+  .comment-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .comment-form input{
+    flex:1;min-width:120px;padding:6px 10px;border:1px solid #E2E5EA;border-radius:6px;font-family:inherit;font-size:12px;color:#1C1F26;
+  }
+  .comment-form input:focus{outline:none;border-color:#D4872E;}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,14,26,.6);display:flex;align-items:center;justify-content:center;
+    padding:16px;z-index:50;backdrop-filter:blur(3px);
+  }
+  .modal{
+    background:#fff;border-radius:14px;padding:clamp(16px,3vw,24px);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+  }
+  .modal h3{margin:0 0 14px;font-size:clamp(17px,2vw,19px);font-weight:800;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#2E3440;}
+  .field input,.field textarea,.field select{
+    width:100%;padding:8px 10px;border:1px solid #E2E5EA;border-radius:8px;font-family:inherit;font-size:clamp(13px,1.2vw,14px);
+    background:#FAFBFC;transition:0.15s;color:#1C1F26;
+  }
+  .field input:focus,.field textarea:focus{outline:none;border-color:#D4872E;background:#fff;}
+  .field textarea{resize:vertical;min-height:60px;}
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #E2E5EA;flex-wrap:wrap;
+  }
+  .followup-row{display:flex;gap:4px;margin-bottom:4px;align-items:center;}
+  .followup-row input{flex:1;}
+  .removeRow{background:none;border:none;color:#B3433D;cursor:pointer;font-size:16px;padding:0 4px;}
+  #uploadProgress{font-size:11px;color:#6B7280;margin-top:4px;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    #app{flex-direction:column;}
+    aside{
+      width:100%;height:auto;max-height:50vh;position:relative;padding:12px;
+    }
+    #projectList{max-height:30vh;}
+    main{padding:10px;}
+    .tabs{flex-wrap:nowrap;overflow-x:auto;}
+    .tab{flex:0 0 auto;min-width:60px;padding:6px 10px;font-size:11px;}
+    .project-header{flex-direction:column;}
+    .header-actions{width:100%;}
+    .header-actions .btn{flex:1;justify-content:center;font-size:11px;padding:6px 10px;}
+    .modal{padding:16px;margin:10px;}
+    .login-box{padding:20px;}
   }
 
-  /* ---------- برنامه اصلی ---------- */
-  #app { display: flex; min-height: 100vh; }
-  aside {
-    width: 280px;
-    background: #1A2A3A;
-    color: #fff;
-    padding: 24px 18px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
+  @media (max-width: 480px) {
+    aside .brand{font-size:16px;}
+    aside .userline{padding:8px 10px;font-size:11px;}
+    #newProjectBtn{font-size:12px;padding:8px 12px;}
+    .proj-item{padding:6px 8px;}
+    .proj-name{font-size:11px;}
+    .meeting-card{padding:10px 14px;}
+    .letter-card{padding:10px 14px;}
   }
-  aside .brand { font-weight: 800; font-size: 20px; }
-  aside .brand small { display: block; font-weight: 400; font-size: 12px; color: #8898B0; margin-top: 4px; }
-  aside .userline {
-    margin: 20px 0 16px;
-    padding: 12px 14px;
-    background: rgba(255,255,255,.06);
-    border-radius: 10px;
-    font-size: 13px;
-  }
-  aside .userline .name { font-weight: 600; }
-  aside .userline .mail { color: #8898B0; font-size: 11px; }
-  #newProjectBtn {
-    background: #D4872E;
-    color: #fff;
-    border: none;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 14px;
-    margin-bottom: 18px;
-    width: 100%;
-    transition: 0.2s;
-  }
-  #newProjectBtn:hover { background: #BF781F; }
-  #projectList { overflow-y: auto; flex: 1; }
-  .proj-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 2px;
-    transition: 0.15s;
-  }
-  .proj-item:hover { background: rgba(255,255,255,.07); }
-  .proj-item.active { background: rgba(255,255,255,.12); }
-  .proj-num {
-    font-size: 10px;
-    font-weight: 700;
-    color: #D4872E;
-    background: rgba(255,255,255,.08);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .proj-name { font-size: 13.5px; font-weight: 500; flex: 1; }
-  .proj-delete {
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.25);
-    cursor: pointer;
-    font-size: 14px;
-    opacity: 0;
-    transition: 0.15s;
-  }
-  .proj-item:hover .proj-delete { opacity: 1; }
-  .proj-delete:hover { color: #B3433D; }
-  #signOutBtn {
-    margin-top: 10px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,.12);
-    color: #9AABBF;
-    padding: 10px;
-    border-radius: 8px;
-    font-family: inherit;
-    cursor: pointer;
-    font-size: 13px;
-    width: 100%;
-    transition: 0.2s;
-  }
-  #signOutBtn:hover { background: rgba(255,255,255,.04); color: #fff; }
-  
-  main {
-    flex: 1;
-    padding: 32px 40px;
-    overflow-y: auto;
-    background: #F4F5F7;
-  }
-  
-  #syncStatus {
-    font-size: 12px;
-    color: #6B7280;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid #E2E5EA;
-  }
-  #syncStatus .dot { width: 8px; height: 8px; border-radius: 50%; background: #bbb; }
-  #syncStatus.ok .dot { background: #2F7D5C; }
-  #syncStatus.busy .dot { background: #D4872E; animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.3;} }
-  
-  .empty-state { text-align: center; color: #6B7280; margin-top: 100px; font-size: 15px; }
-  .empty-state b { display: block; font-size: 21px; color: #1C1F26; margin-bottom: 8px; }
-  
-  .btn {
-    background: #1A2A3A;
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 13px;
-    transition: 0.2s;
-  }
-  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-  .btn.accent { background: #D4872E; }
-  .btn.accent:hover { background: #BF781F; }
-  .btn.secondary { background: #fff; color: #1A2A3A; border: 1px solid #E2E5EA; }
-  .btn.secondary:hover { background: #f8f9fa; }
-  .btn.small { padding: 6px 12px; font-size: 11px; }
-  
-  .project-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-    gap: 14px;
-    background: #fff;
-    padding: 20px 24px;
-    border-radius: 12px;
-    border: 1px solid #E2E5EA;
-  }
-  .project-header .file-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    color: #D4872E;
-    background: #FDF1E0;
-    padding: 3px 12px;
-    border-radius: 50px;
-  }
-  .project-header h2 { margin: 4px 0; font-size: 22px; }
-  .project-header .desc { color: #6B7280; font-size: 14px; }
-  
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 4px;
-    border: 1px solid #E2E5EA;
-    margin-bottom: 24px;
-  }
-  .tab {
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    color: #6B7280;
-    transition: 0.15s;
-  }
-  .tab:hover { background: #F4F5F7; }
-  .tab.active { background: #1A2A3A; color: #fff; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  
-  .timeline { position: relative; padding-right: 20px; }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    right: 6px;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background: #E2E5EA;
-  }
-  .meeting-card {
-    position: relative;
-    background: #fff;
-    border: 1px solid #E2E5EA;
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 18px;
-  }
-  .meeting-card::before {
-    content: '';
-    position: absolute;
-    right: -23px;
-    top: 26px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #D4872E;
-    border: 2px solid #F4F5F7;
-  }
-  .meeting-title { font-size: 17px; font-weight: 700; margin: 3px 0 8px; }
-  .meeting-summary {
-    font-size: 14px;
-    line-height: 2;
-    background: #FAFBFC;
-    padding: 12px 14px;
-    border-radius: 8px;
-    margin-top: 4px;
-  }
-  .meeting-date { font-size: 12px; color: #D4872E; font-weight: 700; }
-  
-  .letter-card {
-    background: #fff;
-    border: 1px solid #E2E5EA;
-    border-radius: 12px;
-    padding: 18px 22px;
-    margin-bottom: 14px;
-    border-right: 4px solid #D4872E;
-  }
-  .letter-number {
-    font-size: 12px;
-    font-weight: 700;
-    color: #D4872E;
-    background: #FDF1E0;
-    padding: 3px 12px;
-    border-radius: 50px;
-  }
-  .letter-title { font-size: 16px; font-weight: 700; margin: 3px 0 6px; }
-  .letter-meta { font-size: 12px; color: #6B7280; }
-  .letter-summary { font-size: 14px; line-height: 1.8; color: #2E3440; margin-top: 6px; }
-  
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(10,14,26,.65);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 50;
-    backdrop-filter: blur(4px);
-  }
-  .modal {
-    background: #fff;
-    border-radius: 14px;
-    padding: 28px 30px 24px;
-    width: 100%;
-    max-width: 540px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .modal h3 { margin: 0 0 18px; font-size: 19px; font-weight: 800; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #2E3440; }
-  .field input, .field textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #E2E5EA;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    background: #FAFBFC;
-    transition: 0.15s;
-    color: #1C1F26;
-  }
-  .field input:focus, .field textarea:focus { outline: none; border-color: #D4872E; background: #fff; }
-  .field textarea { resize: vertical; min-height: 70px; }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 14px;
-    border-top: 1px solid #E2E5EA;
-  }
-  .followup-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 6px;
-    align-items: center;
-  }
-  .followup-row input { flex: 1; }
-  .removeRow {
-    background: none;
-    border: none;
-    color: #B3433D;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0 6px;
-  }
-  .attach-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .attach-chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #F0F2F5;
-    border: 1px solid #E2E5EA;
-    padding: 6px 12px;
-    border-radius: 7px;
-    font-size: 12px;
-    text-decoration: none;
-    color: #1C1F26;
-  }
-  .comments { margin-top: 16px; border-top: 1px dashed #E2E5EA; padding-top: 14px; }
-  .comment {
-    font-size: 13px;
-    margin-bottom: 10px;
-    background: #F8F9FB;
-    border-radius: 7px;
-    padding: 10px 12px;
-    border-right: 2px solid #D4872E;
-  }
-  .comment .meta { color: #6B7280; font-size: 11px; margin-bottom: 3px; }
-  .comment-form { display: flex; gap: 8px; margin-top: 10px; }
-  .comment-form input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #E2E5EA;
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 13px;
-    color: #1C1F26;
-  }
-  #uploadProgress { font-size: 12px; color: #6B7280; margin-top: 6px; }
+
+  /* ===== LOADING ===== */
+  .loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid #E2E5EA;border-top-color:#D4872E;border-radius:50%;animation:spin 0.6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 
-<!-- ===================== صفحه ورود ===================== -->
+<!-- ===== LOGIN ===== -->
 <div id="loginScreen">
   <div class="logo">📁</div>
   <h1>سامانه مدیریت پروژه</h1>
   <p class="subtitle">مدیریت پروژه‌ها، جلسات و نامه‌ها</p>
-  
   <div class="login-box">
-    <div class="field">
-      <label>👤 نام کاربری</label>
-      <input type="text" id="usernameInput" placeholder="نام کاربری را وارد کنید" autocomplete="username">
-    </div>
-    <div class="field">
-      <label>🔒 رمز عبور</label>
-      <input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید" autocomplete="current-password">
-    </div>
-    
+    <div class="field"><label>👤 نام کاربری</label><input type="text" id="usernameInput" placeholder="نام کاربری را وارد کنید" autocomplete="username"></div>
+    <div class="field"><label>🔒 رمز عبور</label><input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید" autocomplete="current-password"></div>
     <button id="loginBtn">ورود به سامانه</button>
     <div id="loginError"></div>
   </div>
 </div>
 
-<!-- ===================== برنامه اصلی ===================== -->
+<!-- ===== APP ===== -->
 <div id="app" class="hidden">
   <aside>
     <div class="brand">📁 پرونده‌های پروژه<small>مدیریت پروژه، جلسات و نامه‌ها</small></div>
-    <div class="userline">
-      <div class="name" id="userName"></div>
-      <div class="mail" id="userMail"></div>
-    </div>
+    <div class="userline"><div class="name" id="userName"></div><div class="mail" id="userMail"></div></div>
     <button id="newProjectBtn">➕ پروژه جدید</button>
     <div id="projectList"></div>
     <button id="signOutBtn">🚪 خروج از حساب</button>
@@ -489,13 +270,19 @@
   </main>
 </div>
 
-<!-- ===================== محل قرارگیری مودال‌ها ===================== -->
+<!-- ===== MODAL ROOT ===== -->
 <div id="modalRoot"></div>
 
 <script>
 // ================================================================
-// تنظیمات کاربران - اینجا کاربران را اضافه/ویرایش کنید
+// CONFIG
 // ================================================================
+const CONFIG = {
+  DRIVE_FOLDER_ID: "1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC",
+  DB_FILENAME: "pms-database.json",
+  CLIENT_ID: "1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com"
+};
+
 const USERS = {
   'admin': { password: '123456', name: 'مدیر سیستم', email: 'admin@system.com' },
   'user': { password: '123456', name: 'کاربر عادی', email: 'user@system.com' },
@@ -504,18 +291,7 @@ const USERS = {
 };
 
 // ================================================================
-// تنظیمات گوگل درایو
-// ================================================================
-const CONFIG = {
-  CLIENT_ID: "1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
-  DRIVE_FOLDER_ID: "1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC",
-  DB_FILENAME: "pms-database.json",
-
-  SCOPES: "https://www.googleapis.com/auth/drive"
-};
-
-// ================================================================
-// متغیرهای سراسری
+// STATE
 // ================================================================
 let accessToken = null;
 let currentUser = null;
@@ -523,435 +299,266 @@ let db = { nextProjectNumber: 1, nextLetterNumber: 1, projects: [], meetings: []
 let dbFileId = null;
 let activeProjectId = null;
 let activeTab = 'meetings';
+let isSaving = false;
 
 // ================================================================
-// توابع کمکی
+// HELPERS
 // ================================================================
-const $ = (sel) => document.querySelector(sel);
-const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; };
 
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function formatDate(d) {
-  try { return new Date(d).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }); } 
-  catch (e) { return d; }
-}
+function formatDate(d){ try{ return new Date(d).toLocaleDateString('fa-IR',{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d; } }
 
-function showLoginError(msg) {
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = msg;
-  errEl.style.display = 'block';
-}
+function formatDateTime(d){ try{ return new Date(d).toLocaleString('fa-IR'); }catch(e){ return d; } }
 
-function setSync(text, state) {
-  const s = document.getElementById('syncStatus');
-  s.className = state || '';
-  document.getElementById('syncText').textContent = text;
-}
+function showLoginError(msg){ const e=$('#loginError'); e.textContent=msg; e.style.display='block'; }
+
+function setSync(text,state){ const s=$('#syncStatus'); s.className=state||''; $('#syncText').textContent=text; }
+
+function debounce(fn,ms=500){ let timer; return (...args)=>{ clearTimeout(timer); timer=setTimeout(()=>fn(...args),ms); }; }
 
 // ================================================================
-// سیستم ورود با نام کاربری و رمز عبور
+// LOGIN
 // ================================================================
-function handleLogin() {
-  const username = document.getElementById('usernameInput').value.trim();
-  const password = document.getElementById('passwordInput').value.trim();
-  const loginBtn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  
-  // مخفی کردن خطای قبلی
+function handleLogin(){
+  const username = $('#usernameInput').value.trim();
+  const password = $('#passwordInput').value.trim();
+  const errEl = $('#loginError');
   errEl.style.display = 'none';
-  
-  // اعتبارسنجی
-  if (!username || !password) {
-    showLoginError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
-    return;
-  }
-  
-  // بررسی کاربر
+  if(!username || !password){ showLoginError('لطفاً نام کاربری و رمز عبور را وارد کنید.'); return; }
   const user = USERS[username];
-  if (!user) {
-    showLoginError('❌ کاربری با این نام پیدا نشد.');
-    return;
-  }
-  
-  if (user.password !== password) {
-    showLoginError('❌ رمز عبور اشتباه است.');
-    return;
-  }
-  
-  // ورود موفق
-  currentUser = { name: user.name, email: user.email, username: username };
-  console.log('✅ ورود موفق:', currentUser.name);
-  
-  // مخفی کردن صفحه ورود و نمایش برنامه
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('userName').textContent = currentUser.name;
-  document.getElementById('userMail').textContent = currentUser.email;
-  
-  // تنظیم دکمه خروج
-  document.getElementById('signOutBtn').onclick = () => location.reload();
-  document.getElementById('newProjectBtn').onclick = openNewProjectModal;
-  
-  // بارگذاری دیتابیس
-  setSync('در حال بارگذاری اطلاعات...', 'busy');
-  loadDatabase().then(() => {
-    setSync('همگام با گوگل‌درایو', 'ok');
-    renderProjectList();
-    renderEmpty();
-  }).catch(err => {
-    console.error('❌ خطا در بارگذاری:', err);
-    setSync('خطا در بارگذاری', '');
-    alert('خطا در بارگذاری دیتابیس: ' + err.message);
-  });
+  if(!user){ showLoginError('❌ کاربری با این نام پیدا نشد.'); return; }
+  if(user.password !== password){ showLoginError('❌ رمز عبور اشتباه است.'); return; }
+  currentUser = { name: user.name, email: user.email, username };
+  $('#loginScreen').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  $('#userName').textContent = currentUser.name;
+  $('#userMail').textContent = currentUser.email;
+  $('#signOutBtn').onclick = () => location.reload();
+  $('#newProjectBtn').onclick = openNewProjectModal;
+  setSync('در حال بارگذاری...', 'busy');
+  loadDatabase().then(()=>{ setSync('همگام با گوگل‌درایو', 'ok'); renderProjectList(); renderEmpty(); })
+    .catch(err=>{ console.error(err); setSync('خطا در بارگذاری', ''); alert('خطا: '+err.message); });
 }
 
-// ================================================================
-// راه‌اندازی رویدادهای صفحه ورود
-// ================================================================
-window.onload = function() {
-  // دکمه ورود
-  document.getElementById('loginBtn').onclick = handleLogin;
-  
-  // ورود با کلید Enter
-  document.getElementById('passwordInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleLogin();
-  });
-  document.getElementById('usernameInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('passwordInput').focus();
-  });
-  
-  // فوکوس خودکار روی فیلد اول
-  document.getElementById('usernameInput').focus();
-  
-  console.log('✅ صفحه بارگذاری شد - سیستم ورود با نام کاربری و رمز عبور');
+window.onload = function(){
+  $('#loginBtn').onclick = handleLogin;
+  $('#passwordInput').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+  $('#usernameInput').addEventListener('keydown', e => { if(e.key==='Enter') $('#passwordInput').focus(); });
+  $('#usernameInput').focus();
+  console.log('✅ سامانه آماده است');
 };
 
 // ================================================================
-// توابع گوگل درایو
+// GOOGLE DRIVE API
 // ================================================================
-async function getAccessToken() {
-  if (!accessToken) {
-    const savedToken = localStorage.getItem('drive_token');
-    if (savedToken) {
-      accessToken = savedToken;
-      return accessToken;
-    }
-    
-    const clientId = '1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com';
-    const redirectUri = window.location.origin + window.location.pathname;
-    const scope = 'https://www.googleapis.com/auth/drive';
-    
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${clientId}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `response_type=token&` +
-      `scope=${encodeURIComponent(scope)}&` +
-      `prompt=consent`;
-    
+function getAccessToken(){
+  return new Promise((resolve) => {
+    const saved = localStorage.getItem('drive_token');
+    if(saved){ accessToken=saved; resolve(saved); return; }
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CONFIG.CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin+window.location.pathname)}&response_type=token&scope=https://www.googleapis.com/auth/drive&prompt=consent`;
     const win = window.open(authUrl, '_blank', 'width=500,height=600');
-    
-    return new Promise((resolve) => {
-      const checkHash = setInterval(() => {
-        try {
-          if (win.closed) {
-            clearInterval(checkHash);
-            resolve(null);
-            return;
-          }
-          const token = localStorage.getItem('drive_token');
-          if (token) {
-            accessToken = token;
-            clearInterval(checkHash);
-            win.close();
-            resolve(token);
-          }
-        } catch(e) {}
-      }, 1000);
-    });
-  }
-  return accessToken;
+    const check = setInterval(() => {
+      try {
+        if(win.closed){ clearInterval(check); resolve(null); return; }
+        const token = localStorage.getItem('drive_token');
+        if(token){ accessToken=token; clearInterval(check); win.close(); resolve(token); }
+      }catch(e){}
+    }, 800);
+  });
 }
 
-async function driveFetch(url, options = {}) {
-  if (!accessToken) {
-    await getAccessToken();
-    if (!accessToken) {
-      throw new Error('برای دسترسی به گوگل درایو نیاز به ورود دارید.');
-    }
-  }
-  
-  options.headers = Object.assign({}, options.headers, { 
-    'Authorization': 'Bearer ' + accessToken 
-  });
-  
+async function driveFetch(url, options={}){
+  if(!accessToken){ const t = await getAccessToken(); if(!t) throw new Error('نیاز به دسترسی به درایو'); }
+  options.headers = Object.assign({}, options.headers, { 'Authorization': 'Bearer '+accessToken });
   const res = await fetch(url, options);
-  if (res.status === 401) {
-    accessToken = null;
-    localStorage.removeItem('drive_token');
-    return driveFetch(url, options);
-  }
-  if (!res.ok) throw new Error('Drive API error: ' + res.status);
+  if(res.status===401){ accessToken=null; localStorage.removeItem('drive_token'); return driveFetch(url, options); }
+  if(!res.ok) throw new Error('خطا: '+res.status);
   return res;
 }
 
-function saveToken(token) {
-  accessToken = token;
-  localStorage.setItem('drive_token', token);
-}
-
 // ================================================================
-// توابع دیتابیس
+// DATABASE
 // ================================================================
-async function loadDatabase() {
+async function loadDatabase(){
   try {
     const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
-    const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-    const listData = await listRes.json();
-    
-    if (listData.files && listData.files.length > 0) {
-      dbFileId = listData.files[0].id;
-      const fileRes = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
-      db = await fileRes.json();
-      console.log('✅ دیتابیس از درایو بارگذاری شد');
-    } else {
+    const list = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+    const data = await list.json();
+    if(data.files && data.files.length>0){
+      dbFileId = data.files[0].id;
+      const file = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
+      db = await file.json();
+      console.log('✅ دیتابیس بارگذاری شد');
+    }else{
       dbFileId = await createDbFile();
-      console.log('✅ فایل دیتابیس جدید ایجاد شد');
+      console.log('✅ دیتابیس جدید ایجاد شد');
     }
-  } catch(e) {
-    console.error('❌ خطا در بارگذاری دیتابیس:', e);
-    console.log('⚠️ استفاده از دیتابیس لوکال');
+  }catch(e){
+    console.error('❌ خطا:', e);
+    const backup = localStorage.getItem('pms_db_backup');
+    if(backup){ db = JSON.parse(backup); console.log('⚠️ از بکاپ استفاده شد'); }
+    else throw e;
   }
 }
 
-async function createDbFile() {
-  const metadata = { 
-    name: CONFIG.DB_FILENAME, 
-    parents: [CONFIG.DRIVE_FOLDER_ID], 
-    mimeType: 'application/json' 
-  };
+async function createDbFile(){
+  const meta = { name: CONFIG.DB_FILENAME, parents: [CONFIG.DRIVE_FOLDER_ID], mimeType: 'application/json' };
   const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', new Blob([JSON.stringify(db)], { type: 'application/json' }));
-  const res = await driveFetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', 
-    { method: 'POST', body: form }
-  );
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', new Blob([JSON.stringify(db)], {type:'application/json'}));
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method:'POST', body:form });
   const data = await res.json();
   return data.id;
 }
 
-async function saveDatabase() {
+async function saveDatabase(){
+  if(isSaving) return;
+  isSaving = true;
   try {
     setSync('در حال ذخیره...', 'busy');
-    await driveFetch(
-      `https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(db)
-      }
-    );
+    await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(db)
+    });
+    localStorage.setItem('pms_db_backup', JSON.stringify(db));
     setSync('همگام با گوگل‌درایو', 'ok');
     console.log('✅ دیتابیس ذخیره شد');
-  } catch(e) {
+  }catch(e){
     console.error('❌ خطا در ذخیره:', e);
     setSync('خطا در ذخیره', '');
     localStorage.setItem('pms_db_backup', JSON.stringify(db));
   }
+  isSaving = false;
+}
+
+async function uploadAttachment(file, customName=null){
+  const fileName = customName || file.name;
+  const meta = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', file);
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method:'POST', body:form });
+  return await res.json();
 }
 
 // ================================================================
-// توابع مدیریت پروژه‌ها
+// PROJECTS
 // ================================================================
-function renderProjectList() {
-  const wrap = document.getElementById('projectList');
+function renderProjectList(){
+  const wrap = $('#projectList');
   wrap.innerHTML = '';
-  
-  db.projects.slice().sort((a, b) => a.number - b.number).forEach(p => {
-    const item = el('div', 'proj-item' + (p.id === activeProjectId ? ' active' : ''));
-    item.innerHTML = `
-      <span class="proj-num">#${p.number}</span>
-      <span class="proj-name">${escapeHtml(p.name)}</span>
-      <button class="proj-delete" title="حذف">✕</button>
-    `;
-    item.onclick = (e) => {
-      if (e.target.classList.contains('proj-delete')) return;
-      activeProjectId = p.id;
-      renderProjectList();
-      renderProject(p.id);
-    };
+  db.projects.slice().sort((a,b)=>a.number-b.number).forEach(p=>{
+    const item = el('div', 'proj-item' + (p.id===activeProjectId?' active':''));
+    item.innerHTML = `<span class="proj-num">#${p.number}</span><span class="proj-name">${escapeHtml(p.name)}</span><button class="proj-delete">✕</button>`;
+    item.onclick = (e) => { if(e.target.classList.contains('proj-delete')) return; activeProjectId=p.id; renderProjectList(); renderProject(p.id); };
     item.querySelector('.proj-delete').onclick = async (e) => {
       e.stopPropagation();
-      if (!confirm(`آیا از حذف پروژه "${p.name}" مطمئن هستید؟`)) return;
-      db.projects = db.projects.filter(pr => pr.id !== p.id);
-      db.meetings = db.meetings.filter(m => m.projectId !== p.id);
-      db.letters = db.letters.filter(l => l.projectId !== p.id);
-      if (activeProjectId === p.id) { activeProjectId = null; renderEmpty(); }
-      await saveDatabase();
-      renderProjectList();
+      if(!confirm(`حذف پروژه "${p.name}"؟`)) return;
+      db.projects = db.projects.filter(pr=>pr.id!==p.id);
+      db.meetings = db.meetings.filter(m=>m.projectId!==p.id);
+      db.letters = db.letters.filter(l=>l.projectId!==p.id);
+      if(activeProjectId===p.id){ activeProjectId=null; renderEmpty(); }
+      await saveDatabase(); renderProjectList();
     };
     wrap.appendChild(item);
   });
 }
 
-function renderEmpty() {
-  document.getElementById('mainContent').innerHTML = `
-    <div class="empty-state">
-      <b>📂 هیچ پروژه‌ای انتخاب نشده</b>
-      از فهرست سمت راست یک پروژه را انتخاب کنید یا «پروژه جدید» بسازید.
-    </div>`;
-}
+function renderEmpty(){ $('#mainContent').innerHTML = `<div class="empty-state"><b>📂 هیچ پروژه‌ای انتخاب نشده</b>از فهرست سمت راست انتخاب کنید یا پروژه جدید بسازید.</div>`; }
 
-function openNewProjectModal() {
-  const overlay = el('div', 'modal-overlay');
+function openNewProjectModal(){
+  const overlay = el('div','modal-overlay');
   overlay.innerHTML = `
     <div class="modal">
       <h3>📄 پروژه جدید — شماره #${db.nextProjectNumber}</h3>
-      <div class="field">
-        <label>نام پروژه</label>
-        <input type="text" id="npName" placeholder="نام پروژه را وارد کنید">
-      </div>
-      <div class="field">
-        <label>توضیح (اختیاری)</label>
-        <textarea id="npDesc" placeholder="توضیحات پروژه..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button class="btn secondary" id="npCancel">انصراف</button>
-        <button class="btn" id="npSave">ثبت پروژه</button>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').appendChild(overlay);
-  
-  overlay.querySelector('#npCancel').onclick = () => overlay.remove();
-  overlay.querySelector('#npSave').onclick = async () => {
+      <div class="field"><label>نام پروژه</label><input type="text" id="npName" placeholder="نام پروژه را وارد کنید"></div>
+      <div class="field"><label>توضیح (اختیاری)</label><textarea id="npDesc" placeholder="توضیحات پروژه..."></textarea></div>
+      <div class="modal-actions"><button class="btn secondary" id="npCancel">انصراف</button><button class="btn" id="npSave">ثبت پروژه</button></div>
+    </div>`;
+  $('#modalRoot').appendChild(overlay);
+  overlay.querySelector('#npCancel').onclick = ()=>overlay.remove();
+  overlay.querySelector('#npSave').onclick = async ()=>{
     const name = overlay.querySelector('#npName').value.trim();
-    if (!name) { alert('لطفاً نام پروژه را وارد کنید.'); return; }
-    
-    const proj = {
-      id: 'p_' + Date.now(),
-      number: db.nextProjectNumber,
-      name: name,
-      description: overlay.querySelector('#npDesc').value.trim(),
-      createdBy: currentUser.email,
-      createdAt: new Date().toISOString()
-    };
+    if(!name){ alert('لطفاً نام پروژه را وارد کنید.'); return; }
+    const proj = { id:'p_'+Date.now(), number:db.nextProjectNumber, name, description:overlay.querySelector('#npDesc').value.trim(), createdBy:currentUser.email, createdAt:new Date().toISOString() };
     db.projects.push(proj);
     db.nextProjectNumber++;
     overlay.remove();
     await saveDatabase();
     renderProjectList();
-    activeProjectId = proj.id;
+    activeProjectId=proj.id;
     renderProjectList();
     renderProject(proj.id);
   };
 }
 
 // ================================================================
-// توابع نمایش پروژه
+// RENDER PROJECT
 // ================================================================
-function renderProject(projectId) {
-  const p = db.projects.find(x => x.id === projectId);
-  if (!p) { renderEmpty(); return; }
-  
-  const main = document.getElementById('mainContent');
+function renderProject(projectId){
+  const p = db.projects.find(x=>x.id===projectId);
+  if(!p){ renderEmpty(); return; }
+  const main = $('#mainContent');
   main.innerHTML = `
     <div class="project-header">
-      <div>
-        <div class="file-tag">پرونده شماره #${p.number}</div>
-        <h2>${escapeHtml(p.name)}</h2>
-        ${p.description ? `<div class="desc">${escapeHtml(p.description)}</div>` : ''}
-        <div style="font-size:12px;color:#6B7280;margin-top:6px;">ایجاد: ${new Date(p.createdAt).toLocaleDateString('fa-IR')}</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn accent" id="newMeetingBtn">➕ جلسه جدید</button>
-        <button class="btn" id="newLetterBtn">✉️ نامه جدید</button>
-      </div>
+      <div><div class="file-tag">پرونده شماره #${p.number}</div><h2>${escapeHtml(p.name)}</h2>${p.description?`<div class="desc">${escapeHtml(p.description)}</div>`:''}<div style="font-size:11px;color:#6B7280;margin-top:4px;">ایجاد: ${new Date(p.createdAt).toLocaleDateString('fa-IR')}</div></div>
+      <div class="header-actions"><button class="btn accent" id="newMeetingBtn">➕ جلسه</button><button class="btn" id="newLetterBtn">✉️ نامه</button></div>
     </div>
-    <div class="tabs">
-      <button class="tab active" data-tab="meetings">📋 جلسات</button>
-      <button class="tab" data-tab="letters">✉️ نامه‌ها</button>
-    </div>
-    <div id="tab-meetings" class="tab-content active">
-      <div class="timeline" id="timeline"></div>
-    </div>
-    <div id="tab-letters" class="tab-content">
-      <div id="letterList"></div>
-    </div>
+    <div class="tabs"><button class="tab active" data-tab="meetings">📋 جلسات</button><button class="tab" data-tab="letters">✉️ نامه‌ها</button></div>
+    <div id="tab-meetings" class="tab-content active"><div class="timeline" id="timeline"></div></div>
+    <div id="tab-letters" class="tab-content"><div id="letterList"></div></div>
   `;
-  
-  // تب‌ها
-  main.querySelectorAll('.tab').forEach(tab => {
-    tab.onclick = () => {
-      main.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  main.querySelectorAll('.tab').forEach(tab=>{
+    tab.onclick = ()=>{
+      main.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
-      const tabName = tab.dataset.tab;
-      main.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      main.querySelector(`#tab-${tabName}`).classList.add('active');
-      if (tabName === 'meetings') renderMeetings(projectId);
+      const tn = tab.dataset.tab;
+      main.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+      main.querySelector(`#tab-${tn}`).classList.add('active');
+      if(tn==='meetings') renderMeetings(projectId);
       else renderLetters(projectId);
     };
   });
-  
-  document.getElementById('newMeetingBtn').onclick = () => openNewMeetingModal(projectId);
-  document.getElementById('newLetterBtn').onclick = () => openNewLetterModal(projectId);
-  
+  $('#newMeetingBtn').onclick = ()=>openNewMeetingModal(projectId);
+  $('#newLetterBtn').onclick = ()=>openNewLetterModal(projectId);
   renderMeetings(projectId);
   renderLetters(projectId);
 }
 
 // ================================================================
-// توابع جلسات
+// MEETINGS
 // ================================================================
-function renderMeetings(projectId) {
-  const meetings = db.meetings.filter(m => m.projectId === projectId).sort((a, b) => new Date(b.date) - new Date(a.date));
-  const tl = document.getElementById('timeline');
-  if (!tl) return;
-  
-  if (meetings.length === 0) {
-    tl.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>📋 هنوز جلسه‌ای ثبت نشده</b></div>`;
-    return;
-  }
-  
+function renderMeetings(projectId){
+  const meetings = db.meetings.filter(m=>m.projectId===projectId).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const tl = $('#timeline');
+  if(!tl) return;
+  if(meetings.length===0){ tl.innerHTML='<div class="empty-state" style="margin-top:30px;"><b>📋 هنوز جلسه‌ای ثبت نشده</b></div>'; return; }
   tl.innerHTML = '';
-  meetings.forEach(m => {
-    const card = el('div', 'meeting-card');
-    const followupsHtml = (m.followUps || []).length ? 
-      `<div style="margin:10px 0 6px;font-weight:700;color:#6B7280;font-size:12px;">📌 پیگیری‌ها</div><ul style="padding-right:20px;line-height:2.2;">${m.followUps.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '';
-    const attachHtml = (m.attachments || []).length ?
-      `<div style="margin:10px 0 6px;font-weight:700;color:#6B7280;font-size:12px;">📎 پیوست‌ها</div><div class="attach-list">${m.attachments.map(a => `<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
-    const commentsHtml = (m.comments || []).map(c => `
-      <div class="comment"><div class="meta">${escapeHtml(c.user)} · ${new Date(c.date).toLocaleString('fa-IR')}</div>${escapeHtml(c.text)}</div>
-    `).join('');
-    
+  meetings.forEach(m=>{
+    const card = el('div','meeting-card');
+    const followups = (m.followUps||[]).length ? `<div style="margin:8px 0 4px;font-weight:700;color:#6B7280;font-size:11px;">📌 پیگیری‌ها</div><ul style="padding-right:18px;line-height:2;">${m.followUps.map(f=>`<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '';
+    const attaches = (m.attachments||[]).length ? `<div style="margin:8px 0 4px;font-weight:700;color:#6B7280;font-size:11px;">📎 پیوست‌ها</div><div class="attach-list">${m.attachments.map(a=>`<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
+    const comments = (m.comments||[]).map(c=>`<div class="comment"><div class="meta">${escapeHtml(c.user)} · ${formatDateTime(c.date)}</div>${escapeHtml(c.text)}</div>`).join('');
     card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;">
-        <div>
-          <div class="meeting-date">📅 ${formatDate(m.date)}</div>
-          <div class="meeting-title">${escapeHtml(m.title)}</div>
-        </div>
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+        <div><div class="meeting-date">📅 ${formatDate(m.date)}</div><div class="meeting-title">${escapeHtml(m.title)}</div></div>
       </div>
       <div class="meeting-summary">${escapeHtml(m.summary)}</div>
-      ${followupsHtml}
-      ${attachHtml}
+      ${followups}${attaches}
       <div class="comments">
-        <div style="font-weight:700;color:#6B7280;font-size:12px;margin-bottom:8px;">💬 کامنت‌ها</div>
-        ${commentsHtml || '<div style="font-size:13px;color:#6B7280;">هنوز کامنتی ثبت نشده</div>'}
-        <div class="comment-form">
-          <input type="text" placeholder="نوشتن کامنت..." class="commentInput">
-          <button class="btn small commentSendBtn">ارسال</button>
-        </div>
+        <div style="font-weight:700;color:#6B7280;font-size:11px;margin-bottom:6px;">💬 کامنت‌ها</div>
+        ${comments||'<div style="font-size:12px;color:#6B7280;">هنوز کامنتی ثبت نشده</div>'}
+        <div class="comment-form"><input type="text" placeholder="نوشتن کامنت..." class="commentInput"><button class="btn small commentSendBtn">ارسال</button></div>
       </div>
     `;
-    
-    card.querySelector('.commentSendBtn').onclick = async () => {
+    card.querySelector('.commentSendBtn').onclick = async ()=>{
       const input = card.querySelector('.commentInput');
       const text = input.value.trim();
-      if (!text) return;
-      m.comments = m.comments || [];
+      if(!text) return;
+      m.comments = m.comments||[];
       m.comments.push({ user: currentUser.name, text, date: new Date().toISOString() });
       await saveDatabase();
       renderProject(m.projectId);
@@ -961,110 +568,64 @@ function renderMeetings(projectId) {
 }
 
 // ================================================================
-// توابع نامه‌ها
+// LETTERS
 // ================================================================
-function renderLetters(projectId) {
-  const letters = db.letters.filter(l => l.projectId === projectId).sort((a, b) => b.number - a.number);
-  const wrap = document.getElementById('letterList');
-  if (!wrap) return;
-  
-  if (letters.length === 0) {
-    wrap.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>✉️ هنوز نامه‌ای ثبت نشده</b></div>`;
-    return;
-  }
-  
-  wrap.innerHTML = '';
-  letters.forEach(l => {
-    const card = el('div', 'letter-card');
-    const attachHtml = (l.attachments || []).length ?
-      `<div style="margin:10px 0 6px;font-weight:700;color:#6B7280;font-size:12px;">📎 پیوست‌ها</div><div class="attach-list">${l.attachments.map(a => `<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
-    
+function renderLetters(projectId){
+  const letters = db.letters.filter(l=>l.projectId===projectId).sort((a,b)=>b.number-a.number);
+  const wrap = $('#letterList');
+  if(!wrap) return;
+  if(letters.length===0){ wrap.innerHTML='<div class="empty-state" style="margin-top:30px;"><b>✉️ هنوز نامه‌ای ثبت نشده</b></div>'; return; }
+  wrap.innerHTML='';
+  letters.forEach(l=>{
+    const card = el('div','letter-card');
+    const attaches = (l.attachments||[]).length ? `<div style="margin:8px 0 4px;font-weight:700;color:#6B7280;font-size:11px;">📎 پیوست‌ها</div><div class="attach-list">${l.attachments.map(a=>`<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
     card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;">
-        <div>
-          <span class="letter-number">✉️ شماره: ${l.number}</span>
-          <div class="letter-title">${escapeHtml(l.title)}</div>
-          <div class="letter-meta">${formatDate(l.date)} · ${escapeHtml(l.sender)} → ${escapeHtml(l.recipient)}</div>
-        </div>
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+        <div><span class="letter-number">✉️ شماره: ${l.number}</span><div class="letter-title">${escapeHtml(l.title)}</div><div class="letter-meta">${formatDate(l.date)} · ${escapeHtml(l.sender)} → ${escapeHtml(l.recipient)}</div></div>
       </div>
-      ${l.summary ? `<div class="letter-summary">${escapeHtml(l.summary)}</div>` : ''}
-      ${attachHtml}
-      <div style="font-size:12px;color:#6B7280;margin-top:8px;">ثبت: ${escapeHtml(l.createdBy)}</div>
+      ${l.summary?`<div class="letter-summary">${escapeHtml(l.summary)}</div>`:''}
+      ${attaches}
+      <div style="font-size:11px;color:#6B7280;margin-top:6px;">ثبت: ${escapeHtml(l.createdBy)} · ${formatDateTime(l.createdAt)}</div>
     `;
     wrap.appendChild(card);
   });
 }
 
 // ================================================================
-// مودال‌های جلسه و نامه
+// MODALS: MEETING & LETTER
 // ================================================================
-function openNewMeetingModal(projectId) {
-  const overlay = el('div', 'modal-overlay');
+function openNewMeetingModal(projectId){
+  const overlay = el('div','modal-overlay');
   overlay.innerHTML = `
     <div class="modal">
       <h3>📝 ثبت جلسه جدید</h3>
       <div class="field"><label>عنوان جلسه</label><input type="text" id="mTitle" placeholder="عنوان جلسه"></div>
       <div class="field"><label>تاریخ</label><input type="date" id="mDate" value="${new Date().toISOString().slice(0,10)}"></div>
       <div class="field"><label>خلاصه جلسه</label><textarea id="mSummary" placeholder="خلاصه جلسه..."></textarea></div>
-      <div class="field">
-        <label>پیگیری‌ها</label>
-        <div id="followupRows"></div>
-        <button type="button" class="btn secondary small" id="addFollowupBtn">➕ افزودن</button>
-      </div>
-      <div class="field">
-        <label>پیوست</label>
-        <input type="file" id="mFiles" multiple>
-        <div id="uploadProgress"></div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn secondary" id="mCancel">انصراف</button>
-        <button class="btn" id="mSave">ثبت جلسه</button>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').appendChild(overlay);
-  
-  const addRow = () => {
-    const row = el('div', 'followup-row');
-    row.innerHTML = `<input type="text" placeholder="مورد پیگیری..."><button type="button" class="removeRow">✕</button>`;
-    row.querySelector('.removeRow').onclick = () => row.remove();
-    overlay.querySelector('#followupRows').appendChild(row);
-  };
+      <div class="field"><label>پیگیری‌ها</label><div id="followupRows"></div><button type="button" class="btn secondary small" id="addFollowupBtn">➕ افزودن</button></div>
+      <div class="field"><label>پیوست</label><input type="file" id="mFiles" multiple><div id="uploadProgress"></div></div>
+      <div class="modal-actions"><button class="btn secondary" id="mCancel">انصراف</button><button class="btn" id="mSave">ثبت جلسه</button></div>
+    </div>`;
+  $('#modalRoot').appendChild(overlay);
+  const addRow = ()=>{ const r=el('div','followup-row'); r.innerHTML='<input type="text" placeholder="مورد پیگیری..."><button type="button" class="removeRow">✕</button>'; r.querySelector('.removeRow').onclick=()=>r.remove(); overlay.querySelector('#followupRows').appendChild(r); };
   overlay.querySelector('#addFollowupBtn').onclick = addRow;
   addRow();
-  
-  overlay.querySelector('#mCancel').onclick = () => overlay.remove();
-  overlay.querySelector('#mSave').onclick = async () => {
+  overlay.querySelector('#mCancel').onclick = ()=>overlay.remove();
+  overlay.querySelector('#mSave').onclick = async ()=>{
     const title = overlay.querySelector('#mTitle').value.trim();
     const date = overlay.querySelector('#mDate').value;
     const summary = overlay.querySelector('#mSummary').value.trim();
-    if (!title || !date || !summary) { alert('لطفاً تمام فیلدها را پر کنید.'); return; }
-    
-    const followUps = Array.from(overlay.querySelectorAll('#followupRows input')).map(i => i.value.trim()).filter(Boolean);
+    if(!title||!date||!summary){ alert('لطفاً تمام فیلدها را پر کنید.'); return; }
+    const followUps = Array.from(overlay.querySelectorAll('#followupRows input')).map(i=>i.value.trim()).filter(Boolean);
     const files = Array.from(overlay.querySelector('#mFiles').files);
-    
     const saveBtn = overlay.querySelector('#mSave');
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'در حال ثبت...';
-    
+    saveBtn.disabled = true; saveBtn.textContent = 'در حال ثبت...';
     const attachments = [];
-    for (let i = 0; i < files.length; i++) {
+    for(let i=0;i<files.length;i++){
       overlay.querySelector('#uploadProgress').textContent = `📤 بارگذاری ${i+1}/${files.length}...`;
-      try {
-        const up = await uploadAttachment(files[i]);
-        attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink });
-      } catch(e) {
-        console.error('خطا در آپلود:', e);
-      }
+      try{ const up = await uploadAttachment(files[i]); attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink }); }catch(e){ console.error(e); }
     }
-    
-    const meeting = {
-      id: 'm_' + Date.now(),
-      projectId, title, date, summary, followUps, attachments,
-      comments: [],
-      createdBy: currentUser.email,
-      createdAt: new Date().toISOString()
-    };
+    const meeting = { id:'m_'+Date.now(), projectId, title, date, summary, followUps, attachments, comments: [], createdBy: currentUser.email, createdAt: new Date().toISOString() };
     db.meetings.push(meeting);
     overlay.remove();
     await saveDatabase();
@@ -1072,8 +633,8 @@ function openNewMeetingModal(projectId) {
   };
 }
 
-function openNewLetterModal(projectId) {
-  const overlay = el('div', 'modal-overlay');
+function openNewLetterModal(projectId){
+  const overlay = el('div','modal-overlay');
   const nextNum = db.nextLetterNumber;
   overlay.innerHTML = `
     <div class="modal">
@@ -1083,79 +644,34 @@ function openNewLetterModal(projectId) {
       <div class="field"><label>فرستنده</label><input type="text" id="lSender" placeholder="نام فرستنده"></div>
       <div class="field"><label>گیرنده</label><input type="text" id="lRecipient" placeholder="نام گیرنده"></div>
       <div class="field"><label>خلاصه (اختیاری)</label><textarea id="lSummary" placeholder="خلاصه نامه..."></textarea></div>
-      <div class="field">
-        <label>پیوست</label>
-        <input type="file" id="lFiles" multiple>
-        <div id="uploadProgress"></div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn secondary" id="lCancel">انصراف</button>
-        <button class="btn" id="lSave">ثبت نامه</button>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').appendChild(overlay);
-  
-  overlay.querySelector('#lCancel').onclick = () => overlay.remove();
-  overlay.querySelector('#lSave').onclick = async () => {
+      <div class="field"><label>پیوست</label><input type="file" id="lFiles" multiple><div id="uploadProgress"></div></div>
+      <div class="modal-actions"><button class="btn secondary" id="lCancel">انصراف</button><button class="btn" id="lSave">ثبت نامه</button></div>
+    </div>`;
+  $('#modalRoot').appendChild(overlay);
+  overlay.querySelector('#lCancel').onclick = ()=>overlay.remove();
+  overlay.querySelector('#lSave').onclick = async ()=>{
     const title = overlay.querySelector('#lTitle').value.trim();
     const date = overlay.querySelector('#lDate').value;
     const sender = overlay.querySelector('#lSender').value.trim();
     const recipient = overlay.querySelector('#lRecipient').value.trim();
-    if (!title || !date || !sender || !recipient) {
-      alert('لطفاً عنوان، تاریخ، فرستنده و گیرنده را وارد کنید.');
-      return;
-    }
-    
+    if(!title||!date||!sender||!recipient){ alert('لطفاً عنوان، تاریخ، فرستنده و گیرنده را وارد کنید.'); return; }
     const files = Array.from(overlay.querySelector('#lFiles').files);
     const saveBtn = overlay.querySelector('#lSave');
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'در حال ثبت...';
-    
+    saveBtn.disabled = true; saveBtn.textContent = 'در حال ثبت...';
     const attachments = [];
-    for (let i = 0; i < files.length; i++) {
+    for(let i=0;i<files.length;i++){
       const file = files[i];
       const customName = `نامه_${nextNum}_${title.replace(/\s+/g,'_')}_${file.name}`;
       overlay.querySelector('#uploadProgress').textContent = `📤 بارگذاری ${customName}...`;
-      try {
-        const up = await uploadAttachment(file, customName);
-        attachments.push({ name: customName, fileId: up.id, link: up.webViewLink });
-      } catch(e) {
-        console.error('خطا در آپلود:', e);
-      }
+      try{ const up = await uploadAttachment(file, customName); attachments.push({ name: customName, fileId: up.id, link: up.webViewLink }); }catch(e){ console.error(e); }
     }
-    
-    const letter = {
-      id: 'l_' + Date.now(),
-      number: nextNum,
-      projectId, title, date, sender, recipient,
-      summary: overlay.querySelector('#lSummary').value.trim(),
-      attachments,
-      createdBy: currentUser.email,
-      createdAt: new Date().toISOString()
-    };
+    const letter = { id:'l_'+Date.now(), number:nextNum, projectId, title, date, sender, recipient, summary: overlay.querySelector('#lSummary').value.trim(), attachments, createdBy: currentUser.email, createdAt: new Date().toISOString() };
     db.letters.push(letter);
     db.nextLetterNumber++;
     overlay.remove();
     await saveDatabase();
     renderProject(projectId);
   };
-}
-
-// ================================================================
-// تابع آپلود
-// ================================================================
-async function uploadAttachment(file, customName = null) {
-  const fileName = customName || file.name;
-  const metadata = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', file);
-  const res = await driveFetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
-    { method: 'POST', body: form }
-  );
-  return await res.json();
 }
 </script>
 </body>
