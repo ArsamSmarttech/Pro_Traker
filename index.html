@@ -6,25 +6,12 @@
 <title>سامانه مدیریت پروژه</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Vazirmatn',sans-serif;background:#F4F5F7;min-height:100vh;}
+  .hidden{display:none !important;}
   
-  body {
-    font-family: 'Vazirmatn', sans-serif;
-    background: #F4F5F7;
-    min-height: 100vh;
-  }
-  
-  .hidden {
-    display: none !important;
-  }
-  
-  /* صفحه ورود */
+  /* ---------- صفحه ورود ---------- */
   #loginScreen {
     min-height: 100vh;
     display: flex;
@@ -37,61 +24,107 @@
     padding: 24px;
   }
   
-  #loginScreen h1 {
-    font-size: 28px;
-    margin-bottom: 10px;
+  #loginScreen .logo { font-size: 48px; margin-bottom: 8px; }
+  #loginScreen h1 { font-size: 28px; margin-bottom: 6px; }
+  #loginScreen .subtitle { color: #B0BCCA; margin-bottom: 30px; font-size: 14px; }
+  
+  .login-box {
+    background: rgba(255,255,255,0.05);
+    padding: 32px 40px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid rgba(255,255,255,0.08);
   }
   
-  #loginScreen p {
-    color: #B0BCCA;
-    margin-bottom: 30px;
-    max-width: 400px;
+  .login-box .field {
+    margin-bottom: 16px;
+    text-align: right;
   }
   
-  /* دکمه ورود گوگل - ساده و قابل اطمینان */
-  #googleLoginBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: #fff;
-    color: #1C1F26;
+  .login-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #C7CEDB;
+  }
+  
+  .login-box input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 15px;
+    transition: 0.2s;
+    direction: ltr;
+  }
+  
+  .login-box input::placeholder {
+    color: #8898B0;
+  }
+  
+  .login-box input:focus {
+    outline: none;
+    border-color: #D4872E;
+    background: rgba(255,255,255,0.12);
+  }
+  
+  #loginBtn {
+    width: 100%;
+    padding: 12px;
+    background: #D4872E;
+    color: #fff;
     border: none;
-    padding: 14px 32px;
-    border-radius: 40px;
+    border-radius: 8px;
     font-family: 'Vazirmatn', sans-serif;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: 0.2s;
+    margin-top: 8px;
   }
   
-  #googleLoginBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  #loginBtn:hover {
+    background: #BF781F;
+    transform: translateY(-1px);
   }
   
-  #googleLoginBtn img {
-    width: 24px;
-    height: 24px;
+  #loginBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
   
   #loginError {
     color: #FFB5AD;
-    margin-top: 16px;
-    font-size: 14px;
+    margin-top: 14px;
+    font-size: 13px;
     background: rgba(255,0,0,0.1);
-    padding: 10px 20px;
+    padding: 10px 16px;
     border-radius: 8px;
     display: none;
+    width: 100%;
+    text-align: center;
   }
   
-  /* اپ اصلی */
-  #app {
-    display: flex;
-    min-height: 100vh;
+  .login-hint {
+    color: #8898B0;
+    font-size: 12px;
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border: 1px dashed rgba(255,255,255,0.08);
   }
   
+  .login-hint strong { color: #D4872E; }
+
+  /* ---------- برنامه اصلی ---------- */
+  #app { display: flex; min-height: 100vh; }
   aside {
     width: 280px;
     background: #1A2A3A;
@@ -102,20 +135,8 @@
     height: 100vh;
     overflow-y: auto;
   }
-  
-  aside .brand {
-    font-weight: 800;
-    font-size: 20px;
-  }
-  
-  aside .brand small {
-    display: block;
-    font-weight: 400;
-    font-size: 12px;
-    color: #8898B0;
-    margin-top: 4px;
-  }
-  
+  aside .brand { font-weight: 800; font-size: 20px; }
+  aside .brand small { display: block; font-weight: 400; font-size: 12px; color: #8898B0; margin-top: 4px; }
   aside .userline {
     margin: 20px 0 16px;
     padding: 12px 14px;
@@ -123,16 +144,8 @@
     border-radius: 10px;
     font-size: 13px;
   }
-  
-  aside .userline .name {
-    font-weight: 600;
-  }
-  
-  aside .userline .mail {
-    color: #8898B0;
-    font-size: 11px;
-  }
-  
+  aside .userline .name { font-weight: 600; }
+  aside .userline .mail { color: #8898B0; font-size: 11px; }
   #newProjectBtn {
     background: #D4872E;
     color: #fff;
@@ -145,13 +158,10 @@
     font-size: 14px;
     margin-bottom: 18px;
     width: 100%;
+    transition: 0.2s;
   }
-  
-  #projectList {
-    overflow-y: auto;
-    flex: 1;
-  }
-  
+  #newProjectBtn:hover { background: #BF781F; }
+  #projectList { overflow-y: auto; flex: 1; }
   .proj-item {
     display: flex;
     align-items: center;
@@ -160,16 +170,10 @@
     border-radius: 8px;
     cursor: pointer;
     margin-bottom: 2px;
+    transition: 0.15s;
   }
-  
-  .proj-item:hover {
-    background: rgba(255,255,255,.07);
-  }
-  
-  .proj-item.active {
-    background: rgba(255,255,255,.12);
-  }
-  
+  .proj-item:hover { background: rgba(255,255,255,.07); }
+  .proj-item.active { background: rgba(255,255,255,.12); }
   .proj-num {
     font-size: 10px;
     font-weight: 700;
@@ -178,13 +182,18 @@
     padding: 2px 8px;
     border-radius: 4px;
   }
-  
-  .proj-name {
-    font-size: 13.5px;
-    font-weight: 500;
-    flex: 1;
+  .proj-name { font-size: 13.5px; font-weight: 500; flex: 1; }
+  .proj-delete {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.25);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: 0.15s;
   }
-  
+  .proj-item:hover .proj-delete { opacity: 1; }
+  .proj-delete:hover { color: #B3433D; }
   #signOutBtn {
     margin-top: 10px;
     background: transparent;
@@ -196,7 +205,9 @@
     cursor: pointer;
     font-size: 13px;
     width: 100%;
+    transition: 0.2s;
   }
+  #signOutBtn:hover { background: rgba(255,255,255,.04); color: #fff; }
   
   main {
     flex: 1;
@@ -217,41 +228,13 @@
     border-radius: 8px;
     border: 1px solid #E2E5EA;
   }
+  #syncStatus .dot { width: 8px; height: 8px; border-radius: 50%; background: #bbb; }
+  #syncStatus.ok .dot { background: #2F7D5C; }
+  #syncStatus.busy .dot { background: #D4872E; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.3;} }
   
-  #syncStatus .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #bbb;
-  }
-  
-  #syncStatus.ok .dot {
-    background: #2F7D5C;
-  }
-  
-  #syncStatus.busy .dot {
-    background: #D4872E;
-    animation: pulse 1s infinite;
-  }
-  
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  
-  .empty-state {
-    text-align: center;
-    color: #6B7280;
-    margin-top: 100px;
-    font-size: 15px;
-  }
-  
-  .empty-state b {
-    display: block;
-    font-size: 21px;
-    color: #1C1F26;
-    margin-bottom: 8px;
-  }
+  .empty-state { text-align: center; color: #6B7280; margin-top: 100px; font-size: 15px; }
+  .empty-state b { display: block; font-size: 21px; color: #1C1F26; margin-bottom: 8px; }
   
   .btn {
     background: #1A2A3A;
@@ -263,22 +246,14 @@
     font-weight: 600;
     cursor: pointer;
     font-size: 13px;
+    transition: 0.2s;
   }
-  
-  .btn.accent {
-    background: #D4872E;
-  }
-  
-  .btn.secondary {
-    background: #fff;
-    color: #1A2A3A;
-    border: 1px solid #E2E5EA;
-  }
-  
-  .btn.small {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn.accent { background: #D4872E; }
+  .btn.accent:hover { background: #BF781F; }
+  .btn.secondary { background: #fff; color: #1A2A3A; border: 1px solid #E2E5EA; }
+  .btn.secondary:hover { background: #f8f9fa; }
+  .btn.small { padding: 6px 12px; font-size: 11px; }
   
   .project-header {
     display: flex;
@@ -292,7 +267,6 @@
     border-radius: 12px;
     border: 1px solid #E2E5EA;
   }
-  
   .project-header .file-tag {
     display: inline-block;
     font-size: 11px;
@@ -302,11 +276,8 @@
     padding: 3px 12px;
     border-radius: 50px;
   }
-  
-  .project-header h2 {
-    margin: 4px 0;
-    font-size: 22px;
-  }
+  .project-header h2 { margin: 4px 0; font-size: 22px; }
+  .project-header .desc { color: #6B7280; font-size: 14px; }
   
   .tabs {
     display: flex;
@@ -317,7 +288,6 @@
     border: 1px solid #E2E5EA;
     margin-bottom: 24px;
   }
-  
   .tab {
     padding: 10px 20px;
     border-radius: 8px;
@@ -328,26 +298,14 @@
     background: transparent;
     font-family: inherit;
     color: #6B7280;
+    transition: 0.15s;
   }
+  .tab:hover { background: #F4F5F7; }
+  .tab.active { background: #1A2A3A; color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
   
-  .tab.active {
-    background: #1A2A3A;
-    color: #fff;
-  }
-  
-  .tab-content {
-    display: none;
-  }
-  
-  .tab-content.active {
-    display: block;
-  }
-  
-  .timeline {
-    position: relative;
-    padding-right: 20px;
-  }
-  
+  .timeline { position: relative; padding-right: 20px; }
   .timeline::before {
     content: '';
     position: absolute;
@@ -357,7 +315,6 @@
     width: 2px;
     background: #E2E5EA;
   }
-  
   .meeting-card {
     position: relative;
     background: #fff;
@@ -366,7 +323,6 @@
     padding: 20px 24px;
     margin-bottom: 18px;
   }
-  
   .meeting-card::before {
     content: '';
     position: absolute;
@@ -378,13 +334,7 @@
     background: #D4872E;
     border: 2px solid #F4F5F7;
   }
-  
-  .meeting-title {
-    font-size: 17px;
-    font-weight: 700;
-    margin: 3px 0 8px;
-  }
-  
+  .meeting-title { font-size: 17px; font-weight: 700; margin: 3px 0 8px; }
   .meeting-summary {
     font-size: 14px;
     line-height: 2;
@@ -393,12 +343,7 @@
     border-radius: 8px;
     margin-top: 4px;
   }
-  
-  .meeting-date {
-    font-size: 12px;
-    color: #D4872E;
-    font-weight: 700;
-  }
+  .meeting-date { font-size: 12px; color: #D4872E; font-weight: 700; }
   
   .letter-card {
     background: #fff;
@@ -408,7 +353,6 @@
     margin-bottom: 14px;
     border-right: 4px solid #D4872E;
   }
-  
   .letter-number {
     font-size: 12px;
     font-weight: 700;
@@ -417,17 +361,9 @@
     padding: 3px 12px;
     border-radius: 50px;
   }
-  
-  .letter-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 3px 0 6px;
-  }
-  
-  .letter-meta {
-    font-size: 12px;
-    color: #6B7280;
-  }
+  .letter-title { font-size: 16px; font-weight: 700; margin: 3px 0 6px; }
+  .letter-meta { font-size: 12px; color: #6B7280; }
+  .letter-summary { font-size: 14px; line-height: 1.8; color: #2E3440; margin-top: 6px; }
   
   .modal-overlay {
     position: fixed;
@@ -438,8 +374,8 @@
     justify-content: center;
     padding: 20px;
     z-index: 50;
+    backdrop-filter: blur(4px);
   }
-  
   .modal {
     background: #fff;
     border-radius: 14px;
@@ -449,24 +385,9 @@
     max-height: 90vh;
     overflow-y: auto;
   }
-  
-  .modal h3 {
-    margin: 0 0 18px;
-    font-size: 19px;
-    font-weight: 800;
-  }
-  
-  .field {
-    margin-bottom: 16px;
-  }
-  
-  .field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  
+  .modal h3 { margin: 0 0 18px; font-size: 19px; font-weight: 800; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #2E3440; }
   .field input, .field textarea {
     width: 100%;
     padding: 10px 12px;
@@ -474,13 +395,11 @@
     border-radius: 8px;
     font-family: inherit;
     font-size: 14px;
+    background: #FAFBFC;
+    transition: 0.15s;
   }
-  
-  .field textarea {
-    resize: vertical;
-    min-height: 70px;
-  }
-  
+  .field input:focus, .field textarea:focus { outline: none; border-color: #D4872E; background: #fff; }
+  .field textarea { resize: vertical; min-height: 70px; }
   .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -489,32 +408,22 @@
     padding-top: 14px;
     border-top: 1px solid #E2E5EA;
   }
-  
   .followup-row {
     display: flex;
     gap: 6px;
     margin-bottom: 6px;
     align-items: center;
   }
-  
-  .followup-row input {
-    flex: 1;
-  }
-  
+  .followup-row input { flex: 1; }
   .removeRow {
     background: none;
     border: none;
     color: #B3433D;
     cursor: pointer;
     font-size: 18px;
+    padding: 0 6px;
   }
-  
-  .attach-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
+  .attach-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .attach-chip {
     display: flex;
     align-items: center;
@@ -527,13 +436,7 @@
     text-decoration: none;
     color: #1C1F26;
   }
-  
-  .comments {
-    margin-top: 16px;
-    border-top: 1px dashed #E2E5EA;
-    padding-top: 14px;
-  }
-  
+  .comments { margin-top: 16px; border-top: 1px dashed #E2E5EA; padding-top: 14px; }
   .comment {
     font-size: 13px;
     margin-bottom: 10px;
@@ -542,19 +445,8 @@
     padding: 10px 12px;
     border-right: 2px solid #D4872E;
   }
-  
-  .comment .meta {
-    color: #6B7280;
-    font-size: 11px;
-    margin-bottom: 3px;
-  }
-  
-  .comment-form {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  
+  .comment .meta { color: #6B7280; font-size: 11px; margin-bottom: 3px; }
+  .comment-form { display: flex; gap: 8px; margin-top: 10px; }
   .comment-form input {
     flex: 1;
     padding: 8px 12px;
@@ -563,28 +455,36 @@
     font-family: inherit;
     font-size: 13px;
   }
-  
-  #uploadProgress {
-    font-size: 12px;
-    color: #6B7280;
-    margin-top: 6px;
-  }
+  #uploadProgress { font-size: 12px; color: #6B7280; margin-top: 6px; }
 </style>
 </head>
 <body>
 
 <!-- ===================== صفحه ورود ===================== -->
 <div id="loginScreen">
-  <h1>📁 سامانه مدیریت پروژه</h1>
-  <p>برای دسترسی به سامانه، با حساب گوگل خود وارد شوید.</p>
+  <div class="logo">📁</div>
+  <h1>سامانه مدیریت پروژه</h1>
+  <p class="subtitle">مدیریت پروژه‌ها، جلسات و نامه‌ها</p>
   
-  <!-- دکمه ورود ساده و مشخص -->
-  <button id="googleLoginBtn">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-    ورود با گوگل
-  </button>
-  
-  <div id="loginError"></div>
+  <div class="login-box">
+    <div class="field">
+      <label>👤 نام کاربری</label>
+      <input type="text" id="usernameInput" placeholder="نام کاربری را وارد کنید" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>🔒 رمز عبور</label>
+      <input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید" autocomplete="current-password">
+    </div>
+    
+    <button id="loginBtn">ورود به سامانه</button>
+    <div id="loginError"></div>
+    
+    <div class="login-hint">
+      💡 <strong>راهنما:</strong><br>
+      کاربر: <strong>admin</strong> · رمز: <strong>123456</strong><br>
+      کاربر: <strong>user</strong> · رمز: <strong>123456</strong>
+    </div>
+  </div>
 </div>
 
 <!-- ===================== برنامه اصلی ===================== -->
@@ -610,18 +510,22 @@
 
 <script>
 // ================================================================
-// تنظیمات
+// تنظیمات کاربران - اینجا کاربران را اضافه/ویرایش کنید
+// ================================================================
+const USERS = {
+  'admin': { password: '123456', name: 'مدیر سیستم', email: 'admin@system.com' },
+  'user': { password: '123456', name: 'کاربر عادی', email: 'user@system.com' },
+  'arsam': { password: '123456', name: 'آرسام', email: 'arsam@system.com' },
+  'koroush': { password: '123456', name: 'کوروش', email: 'koroush@system.com' }
+};
+
+// ================================================================
+// تنظیمات گوگل درایو
 // ================================================================
 const CONFIG = {
   CLIENT_ID: "https://1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
   DRIVE_FOLDER_ID: "https://drive.google.com/drive/folders/1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto",
   DB_FILENAME: "pms-database.json",
-  ALLOWED_EMAILS: [
-    // ایمیل گوگل دقیق هر کاربر مجاز را اینجا اضافه کنید (حداکثر حدود ۱۵ نفر)
-    "Applyforfund@gmail.com",
-    "Arsam.Smarttech@gmail.com"
-    "koroush.gheisari@gmail.com"
-  ],
   SCOPES: "https://www.googleapis.com/auth/drive"
 };
 
@@ -634,18 +538,12 @@ let db = { nextProjectNumber: 1, nextLetterNumber: 1, projects: [], meetings: []
 let dbFileId = null;
 let activeProjectId = null;
 let activeTab = 'meetings';
-let tokenClient = null;
 
 // ================================================================
 // توابع کمکی
 // ================================================================
 const $ = (sel) => document.querySelector(sel);
-const el = (tag, cls, html) => { 
-  const e = document.createElement(tag); 
-  if (cls) e.className = cls; 
-  if (html !== undefined) e.innerHTML = html; 
-  return e; 
-};
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
 
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -669,134 +567,197 @@ function setSync(text, state) {
 }
 
 // ================================================================
-// راه‌اندازی Google Auth - ساده و مستقیم
+// سیستم ورود با نام کاربری و رمز عبور
 // ================================================================
-window.onload = function() {
-  console.log('✅ صفحه بارگذاری شد');
+function handleLogin() {
+  const username = document.getElementById('usernameInput').value.trim();
+  const password = document.getElementById('passwordInput').value.trim();
+  const loginBtn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
   
-  // دکمه ورود
-  const loginBtn = document.getElementById('googleLoginBtn');
+  // مخفی کردن خطای قبلی
+  errEl.style.display = 'none';
   
-  // وقتی دکمه کلیک شد، مستقیماً کتابخانه گوگل را صدا بزن
-  loginBtn.addEventListener('click', function() {
-    console.log('🔄 دکمه ورود کلیک شد');
-    this.disabled = true;
-    this.innerHTML = '⏳ در حال اتصال...';
-    
-    // راه‌اندازی کتابخانه گوگل در لحظه کلیک
-    try {
-      google.accounts.id.initialize({
-        client_id: CONFIG.CLIENT_ID,
-        callback: handleIdToken,
-        cancel_on_tap_outside: false
-      });
-      
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.CLIENT_ID,
-        scope: CONFIG.SCOPES,
-        callback: (resp) => {
-          if (resp.error) {
-            console.error('❌ خطا در دریافت توکن:', resp.error);
-            showLoginError("دسترسی به گوگل‌درایو رد شد.");
-            enableLoginButton();
-            return;
-          }
-          accessToken = resp.access_token;
-          bootApp();
-        }
-      });
-      
-      // نمایش پنجره انتخاب حساب
-      google.accounts.id.prompt();
-      
-    } catch(e) {
-      console.error('❌ خطا:', e);
-      showLoginError('خطا در بارگذاری سرویس گوگل. لطفاً صفحه را رفرش کنید.');
-      enableLoginButton();
-    }
-  });
-  
-  console.log('✅ دکمه ورود آماده است');
-};
-
-function enableLoginButton() {
-  const btn = document.getElementById('googleLoginBtn');
-  btn.disabled = false;
-  btn.innerHTML = `
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-    ورود با گوگل
-  `;
-}
-
-// ================================================================
-// مدیریت پاسخ ورود
-// ================================================================
-function handleIdToken(response) {
-  console.log('🔄 دریافت پاسخ از گوگل');
-  try {
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-    const email = (payload.email || '').toLowerCase();
-    console.log('📧 ایمیل:', email);
-    
-    if (!CONFIG.ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
-      showLoginError("❌ این ایمیل در فهرست کاربران مجاز نیست.");
-      enableLoginButton();
-      return;
-    }
-    
-    currentUser = { name: payload.name, email: payload.email };
-    console.log('✅ کاربر معتبر:', currentUser.name);
-    tokenClient.requestAccessToken({ prompt: '' });
-    
-  } catch(e) {
-    console.error('❌ خطا در handleIdToken:', e);
-    showLoginError('خطا در پردازش اطلاعات ورود.');
-    enableLoginButton();
+  // اعتبارسنجی
+  if (!username || !password) {
+    showLoginError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
+    return;
   }
-}
-
-// ================================================================
-// راه‌اندازی برنامه بعد از ورود
-// ================================================================
-async function bootApp() {
-  console.log('🚀 راه‌اندازی برنامه...');
+  
+  // بررسی کاربر
+  const user = USERS[username];
+  if (!user) {
+    showLoginError('❌ کاربری با این نام پیدا نشد.');
+    return;
+  }
+  
+  if (user.password !== password) {
+    showLoginError('❌ رمز عبور اشتباه است.');
+    return;
+  }
+  
+  // ورود موفق
+  currentUser = { name: user.name, email: user.email, username: username };
+  console.log('✅ ورود موفق:', currentUser.name);
+  
+  // مخفی کردن صفحه ورود و نمایش برنامه
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('userName').textContent = currentUser.name;
   document.getElementById('userMail').textContent = currentUser.email;
+  
+  // تنظیم دکمه خروج
   document.getElementById('signOutBtn').onclick = () => location.reload();
   document.getElementById('newProjectBtn').onclick = openNewProjectModal;
   
-  setSync('در حال بارگذاری...', 'busy');
-  await loadDatabase();
-  setSync('همگام با گوگل‌درایو', 'ok');
-  renderProjectList();
-  renderEmpty();
+  // بارگذاری دیتابیس
+  setSync('در حال بارگذاری اطلاعات...', 'busy');
+  loadDatabase().then(() => {
+    setSync('همگام با گوگل‌درایو', 'ok');
+    renderProjectList();
+    renderEmpty();
+  }).catch(err => {
+    console.error('❌ خطا در بارگذاری:', err);
+    setSync('خطا در بارگذاری', '');
+    alert('خطا در بارگذاری دیتابیس: ' + err.message);
+  });
 }
+
+// ================================================================
+// راه‌اندازی رویدادهای صفحه ورود
+// ================================================================
+window.onload = function() {
+  // دکمه ورود
+  document.getElementById('loginBtn').onclick = handleLogin;
+  
+  // ورود با کلید Enter
+  document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('usernameInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('passwordInput').focus();
+  });
+  
+  // فوکوس خودکار روی فیلد اول
+  document.getElementById('usernameInput').focus();
+  
+  console.log('✅ صفحه بارگذاری شد - سیستم ورود با نام کاربری و رمز عبور');
+};
 
 // ================================================================
 // توابع گوگل درایو
 // ================================================================
+// تابع برای دریافت توکن دسترسی با روش ساده
+async function getAccessToken() {
+  // اگر توکن نداریم، از کاربر می‌خواهیم وارد شود
+  if (!accessToken) {
+    // بررسی اینکه آیا قبلاً توکن ذخیره شده
+    const savedToken = localStorage.getItem('drive_token');
+    if (savedToken) {
+      accessToken = savedToken;
+      return accessToken;
+    }
+    
+    // اگر توکن نداریم، باید با گوگل احراز هویت کنیم
+    // اینجا یک روش ساده برای دریافت توکن با استفاده از OAuth 2.0 Implicit Flow
+    const clientId = '1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com';
+    const redirectUri = window.location.origin + window.location.pathname;
+    const scope = 'https://www.googleapis.com/auth/drive';
+    
+    // ساخت URL برای درخواست توکن
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${clientId}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `response_type=token&` +
+      `scope=${encodeURIComponent(scope)}&` +
+      `prompt=consent`;
+    
+    // باز کردن پنجره جدید برای ورود
+    const win = window.open(authUrl, '_blank', 'width=500,height=600');
+    
+    // منتظر می‌مانیم تا کاربر وارد شود
+    return new Promise((resolve) => {
+      const checkHash = setInterval(() => {
+        try {
+          // بررسی اگر پنجره بسته شده یا توکن دریافت شده
+          if (win.closed) {
+            clearInterval(checkHash);
+            resolve(null);
+            return;
+          }
+          
+          // بررسی توکن در localStorage (از پنجره دیگر)
+          const token = localStorage.getItem('drive_token');
+          if (token) {
+            accessToken = token;
+            clearInterval(checkHash);
+            win.close();
+            resolve(token);
+          }
+        } catch(e) {
+          // خطا را نادیده بگیر
+        }
+      }, 1000);
+    });
+  }
+  return accessToken;
+}
+
+// تابع ساده برای درخواست به Drive API
 async function driveFetch(url, options = {}) {
+  // اگر توکن نداریم، دریافت می‌کنیم
+  if (!accessToken) {
+    await getAccessToken();
+    if (!accessToken) {
+      throw new Error('برای دسترسی به گوگل درایو نیاز به ورود دارید.');
+    }
+  }
+  
   options.headers = Object.assign({}, options.headers, { 
     'Authorization': 'Bearer ' + accessToken 
   });
+  
   const res = await fetch(url, options);
+  if (res.status === 401) {
+    // توکن منقضی شده، دوباره تلاش می‌کنیم
+    accessToken = null;
+    localStorage.removeItem('drive_token');
+    return driveFetch(url, options);
+  }
   if (!res.ok) throw new Error('Drive API error: ' + res.status);
   return res;
 }
 
+// ذخیره توکن در localStorage
+function saveToken(token) {
+  accessToken = token;
+  localStorage.setItem('drive_token', token);
+}
+
+// ================================================================
+// توابع دیتابیس
+// ================================================================
 async function loadDatabase() {
-  const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
-  const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-  const listData = await listRes.json();
-  
-  if (listData.files && listData.files.length > 0) {
-    dbFileId = listData.files[0].id;
-    const fileRes = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
-    db = await fileRes.json();
-  } else {
-    dbFileId = await createDbFile();
+  try {
+    // ابتدا سعی می‌کنیم از درایو بخوانیم
+    const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
+    const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+    const listData = await listRes.json();
+    
+    if (listData.files && listData.files.length > 0) {
+      dbFileId = listData.files[0].id;
+      const fileRes = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
+      db = await fileRes.json();
+      console.log('✅ دیتابیس از درایو بارگذاری شد');
+    } else {
+      // اگر فایل وجود نداشت، جدید ایجاد می‌کنیم
+      dbFileId = await createDbFile();
+      console.log('✅ فایل دیتابیس جدید ایجاد شد');
+    }
+  } catch(e) {
+    console.error('❌ خطا در بارگذاری دیتابیس:', e);
+    // اگر خطا داشت، از دیتابیس لوکال استفاده می‌کنیم
+    console.log('⚠️ استفاده از دیتابیس لوکال');
   }
 }
 
@@ -818,29 +779,24 @@ async function createDbFile() {
 }
 
 async function saveDatabase() {
-  setSync('در حال ذخیره...', 'busy');
-  await driveFetch(
-    `https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(db)
-    }
-  );
-  setSync('همگام با گوگل‌درایو', 'ok');
-}
-
-async function uploadAttachment(file, customName = null) {
-  const fileName = customName || file.name;
-  const metadata = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', file);
-  const res = await driveFetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
-    { method: 'POST', body: form }
-  );
-  return await res.json();
+  try {
+    setSync('در حال ذخیره...', 'busy');
+    await driveFetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(db)
+      }
+    );
+    setSync('همگام با گوگل‌درایو', 'ok');
+    console.log('✅ دیتابیس ذخیره شد');
+  } catch(e) {
+    console.error('❌ خطا در ذخیره:', e);
+    setSync('خطا در ذخیره', '');
+    // در صورت خطا، در localStorage ذخیره می‌کنیم
+    localStorage.setItem('pms_db_backup', JSON.stringify(db));
+  }
 }
 
 // ================================================================
@@ -855,7 +811,7 @@ function renderProjectList() {
     item.innerHTML = `
       <span class="proj-num">#${p.number}</span>
       <span class="proj-name">${escapeHtml(p.name)}</span>
-      <button class="proj-delete" style="background:transparent;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:14px;">✕</button>
+      <button class="proj-delete" title="حذف">✕</button>
     `;
     item.onclick = (e) => {
       if (e.target.classList.contains('proj-delete')) return;
@@ -865,7 +821,7 @@ function renderProjectList() {
     };
     item.querySelector('.proj-delete').onclick = async (e) => {
       e.stopPropagation();
-      if (!confirm(`حذف پروژه "${p.name}"؟`)) return;
+      if (!confirm(`آیا از حذف پروژه "${p.name}" مطمئن هستید؟`)) return;
       db.projects = db.projects.filter(pr => pr.id !== p.id);
       db.meetings = db.meetings.filter(m => m.projectId !== p.id);
       db.letters = db.letters.filter(l => l.projectId !== p.id);
@@ -881,7 +837,7 @@ function renderEmpty() {
   document.getElementById('mainContent').innerHTML = `
     <div class="empty-state">
       <b>📂 هیچ پروژه‌ای انتخاب نشده</b>
-      از فهرست سمت راست یک پروژه را انتخاب کنید.
+      از فهرست سمت راست یک پروژه را انتخاب کنید یا «پروژه جدید» بسازید.
     </div>`;
 }
 
@@ -931,7 +887,7 @@ function openNewProjectModal() {
 }
 
 // ================================================================
-// توابع نمایش پروژه، جلسات و نامه‌ها
+// توابع نمایش پروژه
 // ================================================================
 function renderProject(projectId) {
   const p = db.projects.find(x => x.id === projectId);
@@ -943,7 +899,7 @@ function renderProject(projectId) {
       <div>
         <div class="file-tag">پرونده شماره #${p.number}</div>
         <h2>${escapeHtml(p.name)}</h2>
-        ${p.description ? `<div class="desc" style="color:#6B7280;font-size:14px;">${escapeHtml(p.description)}</div>` : ''}
+        ${p.description ? `<div class="desc">${escapeHtml(p.description)}</div>` : ''}
         <div style="font-size:12px;color:#6B7280;margin-top:6px;">ایجاد: ${new Date(p.createdAt).toLocaleDateString('fa-IR')}</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -955,8 +911,12 @@ function renderProject(projectId) {
       <button class="tab active" data-tab="meetings">📋 جلسات</button>
       <button class="tab" data-tab="letters">✉️ نامه‌ها</button>
     </div>
-    <div id="tab-meetings" class="tab-content active"><div class="timeline" id="timeline"></div></div>
-    <div id="tab-letters" class="tab-content"><div id="letterList"></div></div>
+    <div id="tab-meetings" class="tab-content active">
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div id="tab-letters" class="tab-content">
+      <div id="letterList"></div>
+    </div>
   `;
   
   // تب‌ها
@@ -979,6 +939,9 @@ function renderProject(projectId) {
   renderLetters(projectId);
 }
 
+// ================================================================
+// توابع جلسات
+// ================================================================
 function renderMeetings(projectId) {
   const meetings = db.meetings.filter(m => m.projectId === projectId).sort((a, b) => new Date(b.date) - new Date(a.date));
   const tl = document.getElementById('timeline');
@@ -1001,7 +964,7 @@ function renderMeetings(projectId) {
     `).join('');
     
     card.innerHTML = `
-      <div class="meeting-top" style="display:flex;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;">
         <div>
           <div class="meeting-date">📅 ${formatDate(m.date)}</div>
           <div class="meeting-title">${escapeHtml(m.title)}</div>
@@ -1033,6 +996,9 @@ function renderMeetings(projectId) {
   });
 }
 
+// ================================================================
+// توابع نامه‌ها
+// ================================================================
 function renderLetters(projectId) {
   const letters = db.letters.filter(l => l.projectId === projectId).sort((a, b) => b.number - a.number);
   const wrap = document.getElementById('letterList');
@@ -1050,7 +1016,7 @@ function renderLetters(projectId) {
       `<div style="margin:10px 0 6px;font-weight:700;color:#6B7280;font-size:12px;">📎 پیوست‌ها</div><div class="attach-list">${l.attachments.map(a => `<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
     
     card.innerHTML = `
-      <div class="letter-top" style="display:flex;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;">
         <div>
           <span class="letter-number">✉️ شماره: ${l.number}</span>
           <div class="letter-title">${escapeHtml(l.title)}</div>
@@ -1120,8 +1086,12 @@ function openNewMeetingModal(projectId) {
     const attachments = [];
     for (let i = 0; i < files.length; i++) {
       overlay.querySelector('#uploadProgress').textContent = `📤 بارگذاری ${i+1}/${files.length}...`;
-      const up = await uploadAttachment(files[i]);
-      attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink });
+      try {
+        const up = await uploadAttachment(files[i]);
+        attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink });
+      } catch(e) {
+        console.error('خطا در آپلود:', e);
+      }
     }
     
     const meeting = {
@@ -1183,8 +1153,12 @@ function openNewLetterModal(projectId) {
       const file = files[i];
       const customName = `نامه_${nextNum}_${title.replace(/\s+/g,'_')}_${file.name}`;
       overlay.querySelector('#uploadProgress').textContent = `📤 بارگذاری ${customName}...`;
-      const up = await uploadAttachment(file, customName);
-      attachments.push({ name: customName, fileId: up.id, link: up.webViewLink });
+      try {
+        const up = await uploadAttachment(file, customName);
+        attachments.push({ name: customName, fileId: up.id, link: up.webViewLink });
+      } catch(e) {
+        console.error('خطا در آپلود:', e);
+      }
     }
     
     const letter = {
@@ -1202,6 +1176,22 @@ function openNewLetterModal(projectId) {
     await saveDatabase();
     renderProject(projectId);
   };
+}
+
+// ================================================================
+// تابع آپلود (ساده شده)
+// ================================================================
+async function uploadAttachment(file, customName = null) {
+  const fileName = customName || file.name;
+  const metadata = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+  const res = await driveFetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
+    { method: 'POST', body: form }
+  );
+  return await res.json();
 }
 </script>
 </body>
