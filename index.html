@@ -252,6 +252,9 @@
     <div class="field"><label>🔒 رمز عبور</label><input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید" autocomplete="current-password"></div>
     <button id="loginBtn">ورود به سامانه</button>
     <div id="loginError"></div>
+    <div style="margin-top:12px;font-size:11px;color:#8898B0;background:rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;border:1px dashed rgba(255,255,255,0.08);">
+      🔗 اتصال به گوگل درایو: <span id="driveStatus">در انتظار ورود</span>
+    </div>
   </div>
 </div>
 
@@ -275,12 +278,13 @@
 
 <script>
 // ================================================================
-// CONFIG
+// CONFIG - با ایمیل مشخص برای دسترسی به درایو
 // ================================================================
 const CONFIG = {
   DRIVE_FOLDER_ID: "1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC",
   DB_FILENAME: "pms-database.json",
-  CLIENT_ID: "1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com"
+  CLIENT_ID: "1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
+  DRIVE_EMAIL: "koroush.gheisari@gmail.com"  // ← ایمیل مشخص برای دسترسی به درایو
 };
 
 const USERS = {
@@ -300,6 +304,7 @@ let dbFileId = null;
 let activeProjectId = null;
 let activeTab = 'meetings';
 let isSaving = false;
+let tokenRefreshInterval = null;
 
 // ================================================================
 // HELPERS
@@ -318,7 +323,13 @@ function showLoginError(msg){ const e=$('#loginError'); e.textContent=msg; e.sty
 
 function setSync(text,state){ const s=$('#syncStatus'); s.className=state||''; $('#syncText').textContent=text; }
 
-function debounce(fn,ms=500){ let timer; return (...args)=>{ clearTimeout(timer); timer=setTimeout(()=>fn(...args),ms); }; }
+function updateDriveStatus(text, isConnected){
+  const el = document.getElementById('driveStatus');
+  if(el){
+    el.textContent = text;
+    el.style.color = isConnected ? '#7BC67E' : '#8898B0';
+  }
+}
 
 // ================================================================
 // LOGIN
@@ -332,101 +343,229 @@ function handleLogin(){
   const user = USERS[username];
   if(!user){ showLoginError('❌ کاربری با این نام پیدا نشد.'); return; }
   if(user.password !== password){ showLoginError('❌ رمز عبور اشتباه است.'); return; }
-  currentUser = { name: user.name, email: user.email, username };
+  
+  // تنظیم کاربر فعلی با ایمیل مشخص برای درایو
+  currentUser = { 
+    name: user.name, 
+    email: CONFIG.DRIVE_EMAIL,  // ← ایمیل مشخص برای دسترسی به درایو
+    username: username 
+  };
+  
   $('#loginScreen').classList.add('hidden');
   $('#app').classList.remove('hidden');
   $('#userName').textContent = currentUser.name;
   $('#userMail').textContent = currentUser.email;
-  $('#signOutBtn').onclick = () => location.reload();
+  $('#signOutBtn').onclick = () => { 
+    if(tokenRefreshInterval) clearInterval(tokenRefreshInterval);
+    localStorage.removeItem('drive_token');
+    location.reload(); 
+  };
   $('#newProjectBtn').onclick = openNewProjectModal;
-  setSync('در حال بارگذاری...', 'busy');
-  loadDatabase().then(()=>{ setSync('همگام با گوگل‌درایو', 'ok'); renderProjectList(); renderEmpty(); })
-    .catch(err=>{ console.error(err); setSync('خطا در بارگذاری', ''); alert('خطا: '+err.message); });
-}
-
-window.onload = function(){
-  $('#loginBtn').onclick = handleLogin;
-  $('#passwordInput').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
-  $('#usernameInput').addEventListener('keydown', e => { if(e.key==='Enter') $('#passwordInput').focus(); });
-  $('#usernameInput').focus();
-  console.log('✅ سامانه آماده است');
-};
-
-// ================================================================
-// GOOGLE DRIVE API
-// ================================================================
-function getAccessToken(){
-  return new Promise((resolve) => {
-    const saved = localStorage.getItem('drive_token');
-    if(saved){ accessToken=saved; resolve(saved); return; }
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CONFIG.CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin+window.location.pathname)}&response_type=token&scope=https://www.googleapis.com/auth/drive&prompt=consent`;
-    const win = window.open(authUrl, '_blank', 'width=500,height=600');
-    const check = setInterval(() => {
-      try {
-        if(win.closed){ clearInterval(check); resolve(null); return; }
-        const token = localStorage.getItem('drive_token');
-        if(token){ accessToken=token; clearInterval(check); win.close(); resolve(token); }
-      }catch(e){}
-    }, 800);
+  
+  // راه‌اندازی اتصال به درایو
+  setSync('در حال اتصال به درایو...', 'busy');
+  updateDriveStatus('در حال اتصال...', false);
+  
+  initializeDriveConnection().then(() => {
+    setSync('همگام با گوگل‌درایو', 'ok');
+    updateDriveStatus('✅ متصل', true);
+    renderProjectList();
+    renderEmpty();
+  }).catch(err => {
+    console.error('❌ خطا در اتصال به درایو:', err);
+    setSync('خطا در اتصال به درایو', '');
+    updateDriveStatus('❌ خطا: ' + err.message, false);
+    alert('خطا در اتصال به گوگل درایو: ' + err.message + '\nلطفاً دوباره تلاش کنید.');
   });
 }
 
-async function driveFetch(url, options={}){
-  if(!accessToken){ const t = await getAccessToken(); if(!t) throw new Error('نیاز به دسترسی به درایو'); }
-  options.headers = Object.assign({}, options.headers, { 'Authorization': 'Bearer '+accessToken });
-  const res = await fetch(url, options);
-  if(res.status===401){ accessToken=null; localStorage.removeItem('drive_token'); return driveFetch(url, options); }
-  if(!res.ok) throw new Error('خطا: '+res.status);
+// ================================================================
+// GOOGLE DRIVE CONNECTION - با ایمیل مشخص
+// ================================================================
+async function initializeDriveConnection() {
+  // ابتدا بررسی می‌کنیم آیا توکن ذخیره شده معتبر است
+  const savedToken = localStorage.getItem('drive_token');
+  if(savedToken) {
+    accessToken = savedToken;
+    try {
+      // تست اعتبار توکن
+      await testToken();
+      await loadDatabase();
+      return;
+    } catch(e) {
+      console.log('⚠️ توکن منقضی شده، درخواست جدید...');
+      localStorage.removeItem('drive_token');
+      accessToken = null;
+    }
+  }
+  
+  // دریافت توکن جدید با ایمیل مشخص
+  await requestNewToken();
+  await loadDatabase();
+  
+  // تنظیم تایمر برای رفرش توکن هر 50 دقیقه
+  if(tokenRefreshInterval) clearInterval(tokenRefreshInterval);
+  tokenRefreshInterval = setInterval(() => {
+    console.log('🔄 رفرش توکن در پس‌زمینه...');
+    requestNewToken().catch(e => console.error('❌ خطا در رفرش توکن:', e));
+  }, 50 * 60 * 1000);
+}
+
+async function requestNewToken() {
+  return new Promise((resolve, reject) => {
+    updateDriveStatus('درخواست مجوز...', false);
+    
+    // ساخت URL با login_hint برای ایمیل مشخص
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${CONFIG.CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&` +
+      `response_type=token&` +
+      `scope=https://www.googleapis.com/auth/drive&` +
+      `login_hint=${encodeURIComponent(CONFIG.DRIVE_EMAIL)}&` +
+      `prompt=consent`;
+    
+    // باز کردن پنجره برای ورود
+    const win = window.open(authUrl, '_blank', 'width=500,height=600');
+    if(!win) {
+      reject(new Error('پنجره باز نشد. لطفاً pop-up را فعال کنید.'));
+      return;
+    }
+    
+    let resolved = false;
+    const checkInterval = setInterval(() => {
+      try {
+        if(win.closed) {
+          clearInterval(checkInterval);
+          if(!resolved) {
+            reject(new Error('پنجره بسته شد. لطفاً دوباره تلاش کنید.'));
+          }
+          return;
+        }
+        
+        // بررسی توکن در localStorage (از پنجره دیگر)
+        const token = localStorage.getItem('drive_token');
+        if(token) {
+          accessToken = token;
+          resolved = true;
+          clearInterval(checkInterval);
+          win.close();
+          updateDriveStatus('✅ متصل', true);
+          resolve(token);
+        }
+      } catch(e) {
+        // خطا را نادیده بگیر
+      }
+    }, 1000);
+    
+    // تایم‌اوت 2 دقیقه
+    setTimeout(() => {
+      if(!resolved) {
+        clearInterval(checkInterval);
+        if(!win.closed) win.close();
+        reject(new Error('زمان اتصال به درایو به پایان رسید.'));
+      }
+    }, 120000);
+  });
+}
+
+async function testToken() {
+  const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+    headers: { 'Authorization': 'Bearer ' + accessToken }
+  });
+  if(!res.ok) throw new Error('توکن نامعتبر');
+  return true;
+}
+
+async function driveFetch(url, options={}) {
+  if(!accessToken) {
+    await requestNewToken();
+    if(!accessToken) throw new Error('دسترسی به درایو وجود ندارد');
+  }
+  
+  options.headers = Object.assign({}, options.headers, { 
+    'Authorization': 'Bearer ' + accessToken 
+  });
+  
+  let res = await fetch(url, options);
+  if(res.status === 401) {
+    // توکن منقضی شده، دوباره تلاش
+    accessToken = null;
+    localStorage.removeItem('drive_token');
+    await requestNewToken();
+    options.headers['Authorization'] = 'Bearer ' + accessToken;
+    res = await fetch(url, options);
+  }
+  
+  if(!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`خطا ${res.status}: ${errorText.substring(0, 100)}`);
+  }
   return res;
 }
 
 // ================================================================
-// DATABASE
+// DATABASE - با ذخیره در گوگل درایو
 // ================================================================
-async function loadDatabase(){
+async function loadDatabase() {
   try {
     const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
     const list = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
     const data = await list.json();
-    if(data.files && data.files.length>0){
+    
+    if(data.files && data.files.length > 0) {
       dbFileId = data.files[0].id;
       const file = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
       db = await file.json();
-      console.log('✅ دیتابیس بارگذاری شد');
-    }else{
+      console.log('✅ دیتابیس از درایو بارگذاری شد');
+    } else {
       dbFileId = await createDbFile();
-      console.log('✅ دیتابیس جدید ایجاد شد');
+      console.log('✅ فایل دیتابیس جدید در درایو ایجاد شد');
     }
-  }catch(e){
-    console.error('❌ خطا:', e);
+  } catch(e) {
+    console.error('❌ خطا در بارگذاری دیتابیس:', e);
+    // استفاده از بکاپ محلی در صورت خطا
     const backup = localStorage.getItem('pms_db_backup');
-    if(backup){ db = JSON.parse(backup); console.log('⚠️ از بکاپ استفاده شد'); }
-    else throw e;
+    if(backup) {
+      db = JSON.parse(backup);
+      console.log('⚠️ استفاده از بکاپ محلی');
+    } else {
+      throw e;
+    }
   }
 }
 
-async function createDbFile(){
-  const meta = { name: CONFIG.DB_FILENAME, parents: [CONFIG.DRIVE_FOLDER_ID], mimeType: 'application/json' };
+async function createDbFile() {
+  const meta = { 
+    name: CONFIG.DB_FILENAME, 
+    parents: [CONFIG.DRIVE_FOLDER_ID], 
+    mimeType: 'application/json' 
+  };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
   form.append('file', new Blob([JSON.stringify(db)], {type:'application/json'}));
-  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method:'POST', body:form });
+  const res = await driveFetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', 
+    { method:'POST', body:form }
+  );
   const data = await res.json();
   return data.id;
 }
 
-async function saveDatabase(){
+async function saveDatabase() {
   if(isSaving) return;
   isSaving = true;
   try {
-    setSync('در حال ذخیره...', 'busy');
+    setSync('در حال ذخیره در درایو...', 'busy');
     await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`, {
-      method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(db)
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(db)
     });
+    // بکاپ محلی
     localStorage.setItem('pms_db_backup', JSON.stringify(db));
-    setSync('همگام با گوگل‌درایو', 'ok');
-    console.log('✅ دیتابیس ذخیره شد');
-  }catch(e){
+    setSync('همگام با گوگل‌درایو ✅', 'ok');
+    console.log('✅ دیتابیس در درایو ذخیره شد');
+  } catch(e) {
     console.error('❌ خطا در ذخیره:', e);
     setSync('خطا در ذخیره', '');
     localStorage.setItem('pms_db_backup', JSON.stringify(db));
@@ -434,18 +573,24 @@ async function saveDatabase(){
   isSaving = false;
 }
 
-async function uploadAttachment(file, customName=null){
+async function uploadAttachment(file, customName=null) {
   const fileName = customName || file.name;
-  const meta = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
+  const meta = { 
+    name: fileName, 
+    parents: [CONFIG.DRIVE_FOLDER_ID] 
+  };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
   form.append('file', file);
-  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method:'POST', body:form });
+  const res = await driveFetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', 
+    { method:'POST', body:form }
+  );
   return await res.json();
 }
 
 // ================================================================
-// PROJECTS
+// PROJECTS (همان کدهای قبلی)
 // ================================================================
 function renderProjectList(){
   const wrap = $('#projectList');
@@ -461,7 +606,8 @@ function renderProjectList(){
       db.meetings = db.meetings.filter(m=>m.projectId!==p.id);
       db.letters = db.letters.filter(l=>l.projectId!==p.id);
       if(activeProjectId===p.id){ activeProjectId=null; renderEmpty(); }
-      await saveDatabase(); renderProjectList();
+      await saveDatabase();
+      renderProjectList();
     };
     wrap.appendChild(item);
   });
@@ -592,7 +738,7 @@ function renderLetters(projectId){
 }
 
 // ================================================================
-// MODALS: MEETING & LETTER
+// MODALS
 // ================================================================
 function openNewMeetingModal(projectId){
   const overlay = el('div','modal-overlay');
@@ -673,6 +819,19 @@ function openNewLetterModal(projectId){
     renderProject(projectId);
   };
 }
+
+// ================================================================
+// WINDOW ONLOAD
+// ================================================================
+window.onload = function(){
+  $('#loginBtn').onclick = handleLogin;
+  $('#passwordInput').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+  $('#usernameInput').addEventListener('keydown', e => { if(e.key==='Enter') $('#passwordInput').focus(); });
+  $('#usernameInput').focus();
+  console.log('✅ سامانه مدیریت پروژه با اتصال به گوگل درایو آماده است');
+  console.log('📧 ایمیل دسترسی به درایو:', CONFIG.DRIVE_EMAIL);
+  console.log('📁 پوشه درایو:', CONFIG.DRIVE_FOLDER_ID);
+};
 </script>
 </body>
 </html>
