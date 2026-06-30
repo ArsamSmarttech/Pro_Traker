@@ -38,6 +38,7 @@
   #loginScreen::after{
     content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
   }
+  #loginScreen .logo{font-size:48px; margin-bottom:8px;}
   #loginScreen .badge{
     font-size:13px; letter-spacing:3px; color:var(--accent); font-weight:700; margin-bottom:12px;
     background:rgba(255,255,255,0.05); padding:6px 18px; border-radius:50px;
@@ -45,6 +46,7 @@
   #loginScreen h1{font-size:32px; font-weight:800; margin:0 0 10px; letter-spacing:-0.5px;}
   #loginScreen p{color:#B0BCCA; margin:0 0 32px; max-width:400px; line-height:1.8;}
   #gsiBtnWrap{background:#fff; border-radius:10px; padding:4px; box-shadow:0 8px 30px rgba(0,0,0,0.2);}
+  #gsiBtnWrap iframe{min-height:44px !important;}
   #loginError{color:#FFB5AD; margin-top:20px; font-size:14px; max-width:380px; background:rgba(255,0,0,0.08); padding:10px 16px; border-radius:8px;}
 
   /* ---------- App shell ---------- */
@@ -220,9 +222,10 @@
 
 <!-- ===================== LOGIN ===================== -->
 <div id="loginScreen">
+  <div class="logo">📁</div>
   <div class="badge">مدیریت هوشمند پروژه</div>
   <h1>سامانه مدیریت پروژه، جلسات و نامه‌ها</h1>
-  <p>ورود با حساب گوگل سازمانی. تمام داده‌ها و پیوست‌ها در گوگل‌درایو تیم ذخیره می‌شوند.</p>
+  <p>برای دسترسی به سامانه، با حساب گوگل سازمانی خود وارد شوید.</p>
   <div id="gsiBtnWrap"></div>
   <div id="loginError"></div>
 </div>
@@ -252,7 +255,6 @@
 /* =====================================================================
    CONFIGURATION — این بخش را قبل از انتشار با مقادیر خودتان جایگزین کنید
    ===================================================================== */
-
 const CONFIG = {
   CLIENT_ID: "https://1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
   DRIVE_FOLDER_ID: "https://drive.google.com/drive/folders/1Fp69nrlgchqVpxdP3LsPEMaZjDAp3elC?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto",
@@ -280,46 +282,78 @@ const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) 
 
 /* ---------------- Google Identity / OAuth ---------------- */
 window.onload = () => {
-  google.accounts.id.initialize({
-    client_id: CONFIG.CLIENT_ID,
-    callback: handleIdToken
-  });
-  google.accounts.id.renderButton($('#gsiBtnWrap'), { theme: "outline", size: "large", text: "signin_with", shape: "pill" });
+  try {
+    google.accounts.id.initialize({
+      client_id: CONFIG.CLIENT_ID,
+      callback: handleIdToken,
+      cancel_on_tap_outside: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('gsiBtnWrap'),
+      { 
+        theme: "outline", 
+        size: "large", 
+        text: "signin_with", 
+        shape: "pill",
+        type: "standard",
+        logo_alignment: "left"
+      }
+    );
+    // نمایش دکمه ورود با متن فارسی
+    const btnWrap = document.getElementById('gsiBtnWrap');
+    const btnText = document.createElement('div');
+    btnText.style.cssText = 'margin-top:6px;font-size:12px;color:#8898B0;';
+    btnText.textContent = 'ورود با حساب گوگل';
+    btnWrap.parentNode.insertBefore(btnText, btnWrap.nextSibling);
 
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.CLIENT_ID,
-    scope: CONFIG.SCOPES,
-    callback: (resp) => {
-      if (resp.error) { showLoginError("دسترسی به گوگل‌درایو رد شد."); return; }
-      accessToken = resp.access_token;
-      bootApp();
-    }
-  });
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.CLIENT_ID,
+      scope: CONFIG.SCOPES,
+      callback: (resp) => {
+        if (resp.error) { 
+          showLoginError("دسترسی به گوگل‌درایو رد شد. لطفاً مجدداً تلاش کنید.");
+          return; 
+        }
+        accessToken = resp.access_token;
+        bootApp();
+      }
+    });
+  } catch(e) {
+    console.error('Error initializing Google Auth:', e);
+    showLoginError('خطا در بارگذاری سرویس ورود گوگل. لطفاً صفحه را Refresh کنید.');
+  }
 };
 
 function handleIdToken(response){
-  const payload = JSON.parse(atob(response.credential.split('.')[1]));
-  const email = (payload.email || '').toLowerCase();
-  if (!CONFIG.ALLOWED_EMAILS.map(e=>e.toLowerCase()).includes(email)) {
-    showLoginError("این ایمیل در فهرست کاربران مجاز نیست. با مدیر سامانه تماس بگیرید.");
-    return;
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email = (payload.email || '').toLowerCase();
+    if (!CONFIG.ALLOWED_EMAILS.map(e=>e.toLowerCase()).includes(email)) {
+      showLoginError("❌ این ایمیل در فهرست کاربران مجاز نیست. با مدیر سامانه تماس بگیرید.");
+      return;
+    }
+    currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
+    // درخواست توکن دسترسی به درایو
+    tokenClient.requestAccessToken({ prompt: '' });
+  } catch(e) {
+    showLoginError('خطا در پردازش اطلاعات ورود. لطفاً مجدداً تلاش کنید.');
   }
-  currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
-  tokenClient.requestAccessToken({ prompt: '' });
 }
 
 function showLoginError(msg){
-  $('#loginError').textContent = msg;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = msg;
+  errEl.style.display = 'block';
 }
 
 /* ---------------- Boot app after auth ---------------- */
 async function bootApp(){
-  $('#loginScreen').classList.add('hidden');
-  $('#app').classList.remove('hidden');
-  $('#userName').textContent = currentUser.name;
-  $('#userMail').textContent = currentUser.email;
-  $('#signOutBtn').onclick = () => location.reload();
-  $('#newProjectBtn').onclick = openNewProjectModal;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userMail').textContent = currentUser.email;
+  document.getElementById('signOutBtn').onclick = signOut;
+  document.getElementById('newProjectBtn').onclick = openNewProjectModal;
   setSync('در حال بارگذاری اطلاعات...', 'busy');
   await loadDatabase();
   setSync('همگام با گوگل‌درایو', 'ok');
@@ -327,10 +361,18 @@ async function bootApp(){
   renderEmpty();
 }
 
+function signOut(){
+  if(confirm('آیا از خروج از حساب خود مطمئن هستید؟')){
+    // خروج از حساب گوگل
+    google.accounts.id.disableAutoSelect();
+    location.reload();
+  }
+}
+
 function setSync(text, state){
-  const s = $('#syncStatus');
+  const s = document.getElementById('syncStatus');
   s.className = state || '';
-  $('#syncText').textContent = text;
+  document.getElementById('syncText').textContent = text;
 }
 
 /* ---------------- Drive helpers ---------------- */
@@ -386,7 +428,7 @@ async function uploadAttachment(file, customName = null){
 
 /* ---------------- Rendering: project list ---------------- */
 function renderProjectList(){
-  const wrap = $('#projectList');
+  const wrap = document.getElementById('projectList');
   wrap.innerHTML = '';
   db.projects.slice().sort((a,b)=>a.number-b.number).forEach(p=>{
     const item = el('div', 'proj-item' + (p.id===activeProjectId ? ' active':''));
@@ -417,7 +459,7 @@ function renderProjectList(){
 }
 
 function renderEmpty(){
-  $('#mainContent').innerHTML = `
+  document.getElementById('mainContent').innerHTML = `
     <div class="empty-state">
       <b>📂 هیچ پروژه‌ای انتخاب نشده</b>
       از فهرست سمت راست یک پروژه را انتخاب کنید یا «پروژه جدید» بسازید.
@@ -437,7 +479,7 @@ function openNewProjectModal(){
         <button class="btn" id="npSave">ثبت پروژه</button>
       </div>
     </div>`;
-  $('#modalRoot').appendChild(overlay);
+  document.getElementById('modalRoot').appendChild(overlay);
   overlay.querySelector('#npCancel').onclick = () => overlay.remove();
   overlay.querySelector('#npSave').onclick = async () => {
     const name = overlay.querySelector('#npName').value.trim();
@@ -466,7 +508,7 @@ function renderProject(projectId){
   const p = db.projects.find(x=>x.id===projectId);
   if (!p) { renderEmpty(); return; }
   
-  const main = $('#mainContent');
+  const main = document.getElementById('mainContent');
   main.innerHTML = `
     <div class="project-header">
       <div>
@@ -509,8 +551,8 @@ function renderProject(projectId){
   });
 
   // Buttons
-  $('#newMeetingBtn').onclick = () => openNewMeetingModal(projectId);
-  $('#newLetterBtn').onclick = () => openNewLetterModal(projectId);
+  document.getElementById('newMeetingBtn').onclick = () => openNewMeetingModal(projectId);
+  document.getElementById('newLetterBtn').onclick = () => openNewLetterModal(projectId);
 
   renderMeetings(projectId);
   renderLetters(projectId);
@@ -519,7 +561,8 @@ function renderProject(projectId){
 /* ---------------- Meetings ---------------- */
 function renderMeetings(projectId){
   const meetings = db.meetings.filter(m=>m.projectId===projectId).sort((a,b)=> new Date(b.date) - new Date(a.date));
-  const tl = $('#timeline');
+  const tl = document.getElementById('timeline');
+  if (!tl) return;
   if (meetings.length === 0){
     tl.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>📋 هنوز جلسه‌ای ثبت نشده</b>اولین جلسه این پروژه را ثبت کنید.</div>`;
     return;
@@ -572,7 +615,8 @@ function renderMeetingCard(m){
 /* ---------------- Letters ---------------- */
 function renderLetters(projectId){
   const letters = db.letters.filter(l=>l.projectId===projectId).sort((a,b)=> b.number - a.number);
-  const wrap = $('#letterList');
+  const wrap = document.getElementById('letterList');
+  if (!wrap) return;
   if (letters.length === 0){
     wrap.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>✉️ هنوز نامه‌ای ثبت نشده</b>اولین نامه این پروژه را ثبت کنید.</div>`;
     return;
@@ -625,7 +669,7 @@ function openNewMeetingModal(projectId){
         <button class="btn" id="mSave">ثبت جلسه</button>
       </div>
     </div>`;
-  $('#modalRoot').appendChild(overlay);
+  document.getElementById('modalRoot').appendChild(overlay);
 
   function addFollowupRow(){
     const row = el('div','followup-row');
@@ -692,7 +736,7 @@ function openNewLetterModal(projectId){
         <button class="btn" id="lSave">ثبت نامه</button>
       </div>
     </div>`;
-  $('#modalRoot').appendChild(overlay);
+  document.getElementById('modalRoot').appendChild(overlay);
 
   overlay.querySelector('#lCancel').onclick = () => overlay.remove();
   overlay.querySelector('#lSave').onclick = async () => {
@@ -713,7 +757,6 @@ function openNewLetterModal(projectId){
     const attachments = [];
     for (let i=0;i<files.length;i++){
       const file = files[i];
-      // ساخت نام اختصاصی برای فایل: شماره نامه_عنوان_نام فایل
       const customName = `نامه_${nextNum}_${title.replace(/\s+/g,'_')}_${file.name}`;
       overlay.querySelector('#uploadProgress').textContent = `📤 در حال بارگذاری ${customName}...`;
       const up = await uploadAttachment(file, customName);
