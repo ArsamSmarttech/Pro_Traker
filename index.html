@@ -45,9 +45,40 @@
   }
   #loginScreen h1{font-size:32px; font-weight:800; margin:0 0 10px; letter-spacing:-0.5px;}
   #loginScreen p{color:#B0BCCA; margin:0 0 32px; max-width:400px; line-height:1.8;}
-  #gsiBtnWrap{background:#fff; border-radius:10px; padding:4px; box-shadow:0 8px 30px rgba(0,0,0,0.2);}
-  #gsiBtnWrap iframe{min-height:44px !important;}
-  #loginError{color:#FFB5AD; margin-top:20px; font-size:14px; max-width:380px; background:rgba(255,0,0,0.08); padding:10px 16px; border-radius:8px;}
+  
+  /* دکمه ورود سفارشی */
+  .custom-google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    color: #1C1F26;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    margin: 0 auto;
+  }
+  .custom-google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  }
+  .custom-google-btn img {
+    width: 24px;
+    height: 24px;
+  }
+  .custom-google-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  #loginError{color:#FFB5AD; margin-top:20px; font-size:14px; max-width:380px; background:rgba(255,0,0,0.08); padding:10px 16px; border-radius:8px; display:none;}
 
   /* ---------- App shell ---------- */
   #app{display:flex; min-height:100vh;}
@@ -226,7 +257,13 @@
   <div class="badge">مدیریت هوشمند پروژه</div>
   <h1>سامانه مدیریت پروژه، جلسات و نامه‌ها</h1>
   <p>برای دسترسی به سامانه، با حساب گوگل سازمانی خود وارد شوید.</p>
-  <div id="gsiBtnWrap"></div>
+  
+  <!-- دکمه ورود سفارشی با آیکون گوگل -->
+  <button id="customGoogleBtn" class="custom-google-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    ورود با حساب گوگل
+  </button>
+  
   <div id="loginError"></div>
 </div>
 
@@ -253,7 +290,7 @@
 
 <script>
 /* =====================================================================
-   CONFIGURATION — این بخش را قبل از انتشار با مقادیر خودتان جایگزین کنید
+   CONFIGURATION
    ===================================================================== */
 const CONFIG = {
   CLIENT_ID: "https://1094486513329-4rgt63dvl9d3oqfbhe7pad3uv2s130ca.apps.googleusercontent.com",
@@ -280,74 +317,107 @@ let tokenClient = null;
 const $ = sel => document.querySelector(sel);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML = html; return e; };
 
-/* ---------------- Google Identity / OAuth ---------------- */
-window.onload = () => {
+/* =====================================================================
+   راه‌اندازی Google Identity Services با دکمه سفارشی
+   ===================================================================== */
+window.onload = function() {
+  console.log('✅ صفحه بارگذاری شد - راه‌اندازی Google Auth...');
+  
   try {
+    // راه‌اندازی کتابخانه Google Identity
     google.accounts.id.initialize({
       client_id: CONFIG.CLIENT_ID,
       callback: handleIdToken,
-      cancel_on_tap_outside: false
+      cancel_on_tap_outside: false,
+      auto_select: false
     });
-    google.accounts.id.renderButton(
-      document.getElementById('gsiBtnWrap'),
-      { 
-        theme: "outline", 
-        size: "large", 
-        text: "signin_with", 
-        shape: "pill",
-        type: "standard",
-        logo_alignment: "left"
-      }
-    );
-    // نمایش دکمه ورود با متن فارسی
-    const btnWrap = document.getElementById('gsiBtnWrap');
-    const btnText = document.createElement('div');
-    btnText.style.cssText = 'margin-top:6px;font-size:12px;color:#8898B0;';
-    btnText.textContent = 'ورود با حساب گوگل';
-    btnWrap.parentNode.insertBefore(btnText, btnWrap.nextSibling);
+    console.log('✅ Google Identity initialized successfully');
 
+    // ایجاد token client برای دسترسی به Drive
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CONFIG.CLIENT_ID,
       scope: CONFIG.SCOPES,
       callback: (resp) => {
-        if (resp.error) { 
+        if (resp.error) {
+          console.error('❌ Token error:', resp.error);
           showLoginError("دسترسی به گوگل‌درایو رد شد. لطفاً مجدداً تلاش کنید.");
-          return; 
+          enableLoginButton();
+          return;
         }
+        console.log('✅ Access token received');
         accessToken = resp.access_token;
         bootApp();
       }
     });
+    console.log('✅ Token client initialized');
+
+    // دکمه ورود سفارشی
+    const loginBtn = document.getElementById('customGoogleBtn');
+    loginBtn.addEventListener('click', function() {
+      console.log('🔄 دکمه ورود کلیک شد - درخواست ورود...');
+      this.disabled = true;
+      this.innerHTML = '⏳ در حال اتصال...';
+      
+      // نمایش پنجره انتخاب حساب گوگل
+      google.accounts.id.prompt();
+    });
+
   } catch(e) {
-    console.error('Error initializing Google Auth:', e);
+    console.error('❌ Error initializing Google Auth:', e);
     showLoginError('خطا در بارگذاری سرویس ورود گوگل. لطفاً صفحه را Refresh کنید.');
   }
 };
 
-function handleIdToken(response){
+/* =====================================================================
+   توابع احراز هویت
+   ===================================================================== */
+function handleIdToken(response) {
+  console.log('🔄 دریافت پاسخ از Google Identity...');
   try {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
     const email = (payload.email || '').toLowerCase();
+    console.log('📧 ایمیل کاربر:', email);
+    
     if (!CONFIG.ALLOWED_EMAILS.map(e=>e.toLowerCase()).includes(email)) {
+      console.warn('❌ ایمیل مجاز نیست:', email);
       showLoginError("❌ این ایمیل در فهرست کاربران مجاز نیست. با مدیر سامانه تماس بگیرید.");
+      enableLoginButton();
       return;
     }
+    
     currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
+    console.log('✅ کاربر معتبر:', currentUser.name);
+    
     // درخواست توکن دسترسی به درایو
     tokenClient.requestAccessToken({ prompt: '' });
+    
   } catch(e) {
+    console.error('❌ Error in handleIdToken:', e);
     showLoginError('خطا در پردازش اطلاعات ورود. لطفاً مجدداً تلاش کنید.');
+    enableLoginButton();
   }
 }
 
-function showLoginError(msg){
+function showLoginError(msg) {
   const errEl = document.getElementById('loginError');
   errEl.textContent = msg;
   errEl.style.display = 'block';
 }
 
-/* ---------------- Boot app after auth ---------------- */
-async function bootApp(){
+function enableLoginButton() {
+  const btn = document.getElementById('customGoogleBtn');
+  btn.disabled = false;
+  btn.innerHTML = `
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    ورود با حساب گوگل
+  `;
+}
+
+/* =====================================================================
+   راه‌اندازی برنامه بعد از ورود
+   ===================================================================== */
+async function bootApp() {
+  console.log('🚀 راه‌اندازی برنامه...');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('userName').textContent = currentUser.name;
@@ -361,33 +431,34 @@ async function bootApp(){
   renderEmpty();
 }
 
-function signOut(){
-  if(confirm('آیا از خروج از حساب خود مطمئن هستید؟')){
-    // خروج از حساب گوگل
+function signOut() {
+  if (confirm('آیا از خروج از حساب خود مطمئن هستید؟')) {
     google.accounts.id.disableAutoSelect();
     location.reload();
   }
 }
 
-function setSync(text, state){
+function setSync(text, state) {
   const s = document.getElementById('syncStatus');
   s.className = state || '';
   document.getElementById('syncText').textContent = text;
 }
 
-/* ---------------- Drive helpers ---------------- */
-async function driveFetch(url, options={}){
+/* =====================================================================
+   توابع گوگل درایو
+   ===================================================================== */
+async function driveFetch(url, options = {}) {
   options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + accessToken });
   const res = await fetch(url, options);
   if (!res.ok) throw new Error('Drive API error: ' + res.status + ' ' + (await res.text()));
   return res;
 }
 
-async function loadDatabase(){
+async function loadDatabase() {
   const q = encodeURIComponent(`name='${CONFIG.DB_FILENAME}' and '${CONFIG.DRIVE_FOLDER_ID}' in parents and trashed=false`);
   const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
   const listData = await listRes.json();
-  if (listData.files && listData.files.length > 0){
+  if (listData.files && listData.files.length > 0) {
     dbFileId = listData.files[0].id;
     const fileRes = await driveFetch(`https://www.googleapis.com/drive/v3/files/${dbFileId}?alt=media`);
     db = await fileRes.json();
@@ -396,49 +467,51 @@ async function loadDatabase(){
   }
 }
 
-async function createDbFile(){
+async function createDbFile() {
   const metadata = { name: CONFIG.DB_FILENAME, parents: [CONFIG.DRIVE_FOLDER_ID], mimeType: 'application/json' };
   const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
-  form.append('file', new Blob([JSON.stringify(db)], {type:'application/json'}));
-  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method:'POST', body: form });
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', new Blob([JSON.stringify(db)], { type: 'application/json' }));
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method: 'POST', body: form });
   const data = await res.json();
   return data.id;
 }
 
-async function saveDatabase(){
+async function saveDatabase() {
   setSync('در حال ذخیره...', 'busy');
   await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`, {
-    method:'PATCH',
-    headers: { 'Content-Type':'application/json' },
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(db)
   });
   setSync('همگام با گوگل‌درایو', 'ok');
 }
 
-async function uploadAttachment(file, customName = null){
+async function uploadAttachment(file, customName = null) {
   const fileName = customName ? customName : file.name;
   const metadata = { name: fileName, parents: [CONFIG.DRIVE_FOLDER_ID] };
   const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
   form.append('file', file);
-  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method:'POST', body: form });
+  const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method: 'POST', body: form });
   return await res.json();
 }
 
-/* ---------------- Rendering: project list ---------------- */
-function renderProjectList(){
+/* =====================================================================
+   بقیه توابع (پروژه، جلسات، نامه‌ها) - مانند قبل
+   ===================================================================== */
+function renderProjectList() {
   const wrap = document.getElementById('projectList');
   wrap.innerHTML = '';
-  db.projects.slice().sort((a,b)=>a.number-b.number).forEach(p=>{
-    const item = el('div', 'proj-item' + (p.id===activeProjectId ? ' active':''));
+  db.projects.slice().sort((a, b) => a.number - b.number).forEach(p => {
+    const item = el('div', 'proj-item' + (p.id === activeProjectId ? ' active' : ''));
     item.innerHTML = `
       <span class="proj-num">#${p.number}</span>
       <span class="proj-name">${escapeHtml(p.name)}</span>
       <button class="proj-delete" title="حذف پروژه">✕</button>
     `;
     item.onclick = (e) => {
-      if(e.target.classList.contains('proj-delete')) return;
+      if (e.target.classList.contains('proj-delete')) return;
       activeProjectId = p.id;
       activeTab = 'meetings';
       renderProjectList();
@@ -446,11 +519,11 @@ function renderProjectList(){
     };
     item.querySelector('.proj-delete').onclick = async (e) => {
       e.stopPropagation();
-      if(!confirm(`آیا از حذف پروژه "${p.name}" و تمام جلسات و نامه‌های آن مطمئن هستید؟`)) return;
+      if (!confirm(`آیا از حذف پروژه "${p.name}" و تمام جلسات و نامه‌های آن مطمئن هستید؟`)) return;
       db.projects = db.projects.filter(pr => pr.id !== p.id);
       db.meetings = db.meetings.filter(m => m.projectId !== p.id);
       db.letters = db.letters.filter(l => l.projectId !== p.id);
-      if(activeProjectId === p.id){ activeProjectId = null; renderEmpty(); }
+      if (activeProjectId === p.id) { activeProjectId = null; renderEmpty(); }
       await saveDatabase();
       renderProjectList();
     };
@@ -458,7 +531,7 @@ function renderProjectList(){
   });
 }
 
-function renderEmpty(){
+function renderEmpty() {
   document.getElementById('mainContent').innerHTML = `
     <div class="empty-state">
       <b>📂 هیچ پروژه‌ای انتخاب نشده</b>
@@ -466,9 +539,8 @@ function renderEmpty(){
     </div>`;
 }
 
-/* ---------------- New project ---------------- */
-function openNewProjectModal(){
-  const overlay = el('div','modal-overlay');
+function openNewProjectModal() {
+  const overlay = el('div', 'modal-overlay');
   overlay.innerHTML = `
     <div class="modal">
       <h3>📄 پروژه جدید — شماره پرونده #${db.nextProjectNumber}</h3>
@@ -503,11 +575,10 @@ function openNewProjectModal(){
   };
 }
 
-/* ---------------- Project detail ---------------- */
-function renderProject(projectId){
-  const p = db.projects.find(x=>x.id===projectId);
+function renderProject(projectId) {
+  const p = db.projects.find(x => x.id === projectId);
   if (!p) { renderEmpty(); return; }
-  
+
   const main = document.getElementById('mainContent');
   main.innerHTML = `
     <div class="project-header">
@@ -536,7 +607,6 @@ function renderProject(projectId){
     </div>
   `;
 
-  // Tab switching
   main.querySelectorAll('.tab').forEach(tab => {
     tab.onclick = () => {
       main.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -545,12 +615,11 @@ function renderProject(projectId){
       activeTab = tabName;
       main.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
       main.querySelector(`#tab-${tabName}`).classList.add('active');
-      if(tabName === 'meetings') renderMeetings(projectId);
+      if (tabName === 'meetings') renderMeetings(projectId);
       else renderLetters(projectId);
     };
   });
 
-  // Buttons
   document.getElementById('newMeetingBtn').onclick = () => openNewMeetingModal(projectId);
   document.getElementById('newLetterBtn').onclick = () => openNewLetterModal(projectId);
 
@@ -558,12 +627,11 @@ function renderProject(projectId){
   renderLetters(projectId);
 }
 
-/* ---------------- Meetings ---------------- */
-function renderMeetings(projectId){
-  const meetings = db.meetings.filter(m=>m.projectId===projectId).sort((a,b)=> new Date(b.date) - new Date(a.date));
+function renderMeetings(projectId) {
+  const meetings = db.meetings.filter(m => m.projectId === projectId).sort((a, b) => new Date(b.date) - new Date(a.date));
   const tl = document.getElementById('timeline');
   if (!tl) return;
-  if (meetings.length === 0){
+  if (meetings.length === 0) {
     tl.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>📋 هنوز جلسه‌ای ثبت نشده</b>اولین جلسه این پروژه را ثبت کنید.</div>`;
     return;
   }
@@ -571,13 +639,13 @@ function renderMeetings(projectId){
   meetings.forEach(m => tl.appendChild(renderMeetingCard(m)));
 }
 
-function renderMeetingCard(m){
-  const card = el('div','meeting-card');
-  const followupsHtml = (m.followUps||[]).length
-    ? `<div class="meeting-section-label">📌 پیگیری‌ها</div><ul class="followup-list">${m.followUps.map(f=>`<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '';
-  const attachHtml = (m.attachments||[]).length
-    ? `<div class="meeting-section-label">📎 پیوست‌ها</div><div class="attach-list">${m.attachments.map(a=>`<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
-  const commentsHtml = (m.comments||[]).map(c=>`
+function renderMeetingCard(m) {
+  const card = el('div', 'meeting-card');
+  const followupsHtml = (m.followUps || []).length ?
+    `<div class="meeting-section-label">📌 پیگیری‌ها</div><ul class="followup-list">${m.followUps.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '';
+  const attachHtml = (m.attachments || []).length ?
+    `<div class="meeting-section-label">📎 پیوست‌ها</div><div class="attach-list">${m.attachments.map(a => `<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
+  const commentsHtml = (m.comments || []).map(c => `
     <div class="comment"><div class="meta">${escapeHtml(c.user)} · ${new Date(c.date).toLocaleString('fa-IR')}</div>${escapeHtml(c.text)}</div>
   `).join('');
 
@@ -612,12 +680,11 @@ function renderMeetingCard(m){
   return card;
 }
 
-/* ---------------- Letters ---------------- */
-function renderLetters(projectId){
-  const letters = db.letters.filter(l=>l.projectId===projectId).sort((a,b)=> b.number - a.number);
+function renderLetters(projectId) {
+  const letters = db.letters.filter(l => l.projectId === projectId).sort((a, b) => b.number - a.number);
   const wrap = document.getElementById('letterList');
   if (!wrap) return;
-  if (letters.length === 0){
+  if (letters.length === 0) {
     wrap.innerHTML = `<div class="empty-state" style="margin-top:40px;"><b>✉️ هنوز نامه‌ای ثبت نشده</b>اولین نامه این پروژه را ثبت کنید.</div>`;
     return;
   }
@@ -625,10 +692,10 @@ function renderLetters(projectId){
   letters.forEach(l => wrap.appendChild(renderLetterCard(l)));
 }
 
-function renderLetterCard(l){
-  const card = el('div','letter-card');
-  const attachHtml = (l.attachments||[]).length
-    ? `<div class="meeting-section-label">📎 پیوست‌ها</div><div class="attach-list">${l.attachments.map(a=>`<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
+function renderLetterCard(l) {
+  const card = el('div', 'letter-card');
+  const attachHtml = (l.attachments || []).length ?
+    `<div class="meeting-section-label">📎 پیوست‌ها</div><div class="attach-list">${l.attachments.map(a => `<a class="attach-chip" target="_blank" href="${a.link}">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>` : '';
 
   card.innerHTML = `
     <div class="letter-top">
@@ -645,14 +712,13 @@ function renderLetterCard(l){
   return card;
 }
 
-/* ---------------- New meeting modal ---------------- */
-function openNewMeetingModal(projectId){
-  const overlay = el('div','modal-overlay');
+function openNewMeetingModal(projectId) {
+  const overlay = el('div', 'modal-overlay');
   overlay.innerHTML = `
     <div class="modal">
       <h3>📝 ثبت جلسه جدید</h3>
       <div class="field"><label>عنوان جلسه</label><input type="text" id="mTitle" placeholder="مثال: جلسه بررسی پیشرفت"></div>
-      <div class="field"><label>تاریخ</label><input type="date" id="mDate" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>تاریخ</label><input type="date" id="mDate" value="${new Date().toISOString().slice(0, 10)}"></div>
       <div class="field"><label>خلاصه جلسه</label><textarea id="mSummary" placeholder="گزارش کامل جلسه، تصمیمات و مباحث مطرح شده..."></textarea></div>
       <div class="field">
         <label>پیگیری‌ها</label>
@@ -671,8 +737,8 @@ function openNewMeetingModal(projectId){
     </div>`;
   document.getElementById('modalRoot').appendChild(overlay);
 
-  function addFollowupRow(){
-    const row = el('div','followup-row');
+  function addFollowupRow() {
+    const row = el('div', 'followup-row');
     row.innerHTML = `<input type="text" placeholder="مورد پیگیری..."><button type="button" class="removeRow">✕</button>`;
     row.querySelector('.removeRow').onclick = () => row.remove();
     overlay.querySelector('#followupRows').appendChild(row);
@@ -687,15 +753,15 @@ function openNewMeetingModal(projectId){
     const summary = overlay.querySelector('#mSummary').value.trim();
     if (!title || !date) { alert('لطفاً عنوان و تاریخ جلسه را وارد کنید.'); return; }
     if (!summary) { alert('لطفاً خلاصه جلسه را وارد کنید.'); return; }
-    const followUps = Array.from(overlay.querySelectorAll('#followupRows input')).map(i=>i.value.trim()).filter(Boolean);
+    const followUps = Array.from(overlay.querySelectorAll('#followupRows input')).map(i => i.value.trim()).filter(Boolean);
     const files = Array.from(overlay.querySelector('#mFiles').files);
 
     const saveBtn = overlay.querySelector('#mSave');
     saveBtn.disabled = true; saveBtn.textContent = 'در حال ثبت...';
 
     const attachments = [];
-    for (let i=0;i<files.length;i++){
-      overlay.querySelector('#uploadProgress').textContent = `📤 در حال بارگذاری پیوست ${i+1} از ${files.length}...`;
+    for (let i = 0; i < files.length; i++) {
+      overlay.querySelector('#uploadProgress').textContent = `📤 در حال بارگذاری پیوست ${i + 1} از ${files.length}...`;
       const up = await uploadAttachment(files[i]);
       attachments.push({ name: files[i].name, fileId: up.id, link: up.webViewLink });
     }
@@ -714,15 +780,14 @@ function openNewMeetingModal(projectId){
   };
 }
 
-/* ---------------- New letter modal ---------------- */
-function openNewLetterModal(projectId){
-  const overlay = el('div','modal-overlay');
+function openNewLetterModal(projectId) {
+  const overlay = el('div', 'modal-overlay');
   const nextNum = db.nextLetterNumber;
   overlay.innerHTML = `
     <div class="modal">
       <h3>✉️ ثبت نامه جدید — شماره نامه: ${nextNum}</h3>
       <div class="field"><label>عنوان نامه</label><input type="text" id="lTitle" placeholder="موضوع نامه"></div>
-      <div class="field"><label>تاریخ</label><input type="date" id="lDate" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>تاریخ</label><input type="date" id="lDate" value="${new Date().toISOString().slice(0, 10)}"></div>
       <div class="field"><label>فرستنده</label><input type="text" id="lSender" placeholder="نام فرستنده"></div>
       <div class="field"><label>گیرنده</label><input type="text" id="lRecipient" placeholder="نام گیرنده"></div>
       <div class="field"><label>خلاصه نامه (اختیاری)</label><textarea id="lSummary" placeholder="خلاصه محتوای نامه..."></textarea></div>
@@ -755,9 +820,9 @@ function openNewLetterModal(projectId){
     saveBtn.disabled = true; saveBtn.textContent = 'در حال ثبت...';
 
     const attachments = [];
-    for (let i=0;i<files.length;i++){
+    for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const customName = `نامه_${nextNum}_${title.replace(/\s+/g,'_')}_${file.name}`;
+      const customName = `نامه_${nextNum}_${title.replace(/\s+/g, '_')}_${file.name}`;
       overlay.querySelector('#uploadProgress').textContent = `📤 در حال بارگذاری ${customName}...`;
       const up = await uploadAttachment(file, customName);
       attachments.push({ name: customName, fileId: up.id, link: up.webViewLink });
@@ -781,7 +846,6 @@ function openNewLetterModal(projectId){
     overlay.remove();
     await saveDatabase();
     renderProject(projectId);
-    // Switch to letters tab after adding
     activeTab = 'letters';
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(t => t.classList.remove('active'));
@@ -792,12 +856,12 @@ function openNewLetterModal(projectId){
   };
 }
 
-/* ---------------- utils ---------------- */
-function escapeHtml(str){
-  return String(str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
-function formatDate(d){
-  try{ return new Date(d).toLocaleDateString('fa-IR', {year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d; }
+
+function formatDate(d) {
+  try { return new Date(d).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) { return d; }
 }
 </script>
 </body>
